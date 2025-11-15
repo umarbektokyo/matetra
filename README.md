@@ -4,3 +4,4 @@ The ultimate math game made by self-claimed "The best future mathematicians on t
 Matetra Team:
 - Flush! - Esia
 - Noga L.
+- Pikachu - Meharwan
