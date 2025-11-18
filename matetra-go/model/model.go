@@ -14,7 +14,7 @@ type Card struct {
 type Player struct {
 	Name    string
 	Hash    string
-	Numbers []string
+	Numbers [5]string
 	Hand    [6]string
 	Queue   []string // Card.ID
 	Done    bool
