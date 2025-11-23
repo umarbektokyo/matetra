@@ -17,8 +17,8 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-Global="*res://global.gd"
-GlobalController="*res://global_controller.gd"
+Global="*res://Scripts/global.gd"
+GlobalController="*res://Scripts/global_controller.gd"
 
 [rendering]
 
