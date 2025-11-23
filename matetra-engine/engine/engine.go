@@ -70,6 +70,8 @@ func (g *Game) GiveCardToPlayer(cardID string, playerID int) error {
 	return errors.New("card not found")
 }
 
+// Move a card into an action // we should figure out a better solution
+
 // Toggles Done boolean for the player
 func (g *Game) ToggleTurn(playerID int) error {
 	if playerID < 0 || playerID >= len(g.State.Players) {
@@ -79,12 +81,19 @@ func (g *Game) ToggleTurn(playerID int) error {
 	return nil
 }
 
-func (g *Game) EndTurn() error {
-	// Check if everyone is done
+// Checks if everyone ended the turn
+func (g *Game) TurnEnded() bool {
 	for i := range g.State.Players {
 		if !g.State.Players[i].Done {
-			return errors.New("there are player who are not done")
+			return false
 		}
+	}
+	return true
+}
+
+func (g *Game) EndTurn() error {
+	if !g.TurnEnded() {
+		return errors.New("some people still haven't finished the turn")
 	}
 	// Reset Done variables, fill hands and increment turn.
 	for i := range g.State.Players {
