@@ -90,8 +90,10 @@ func change_2d_scene(
 		current_2d_scene.queue_free() # Removes node entirely
 	elif keep_running:
 		current_2d_scene.visible = false # Keeps in memory and running
+	elif world_2d.get_child_count() >= 1:
+		remove_child(current_2d_scene) # Keeps in memory, does not run
 	else:
-		world_2d.remove_child(current_2d_scene) # Keeps in memory, does not run
+		return
 	if new_scene != "null":
 		var new = load(new_scene).instantiate()
 		world_2d.add_child(new)

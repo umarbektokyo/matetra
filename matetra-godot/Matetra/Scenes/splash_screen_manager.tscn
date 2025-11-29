@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://dyfpfdhj10w6k"]
+[gd_scene load_steps=3 format=3 uid="uid://dyfpfdhj10w6k"]
 
 [ext_resource type="Script" uid="uid://y3evsfqxsyw7" path="res://Scripts/splash_screen_manager.gd" id="1_nk0e0"]
+[ext_resource type="Texture2D" uid="uid://dfxchqq6unlgy" path="res://matetra-snake-2-cropped.png" id="2_lgypn"]
 
 [node name="SplashScreenManager" type="Control" node_paths=PackedStringArray("splash_screen_container")]
 layout_mode = 3
@@ -20,7 +21,16 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="ColorRect2" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
 [node name="ColorRect" type="ColorRect" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -36,3 +46,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="SplashScreenContainer"]
+layout_mode = 2
+texture = ExtResource("2_lgypn")
