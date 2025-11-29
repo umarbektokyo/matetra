@@ -15,7 +15,6 @@ var splash_screens : Array
 
 func fade() -> void:
 	for screen in splash_screens:
-		screen.modulate.a = 0.0
 		var tween = self.create_tween()
 		tween.tween_interval(in_time)
 		tween.tween_property(screen, "modulate:a", 1.0, fade_in_time)
@@ -23,7 +22,7 @@ func fade() -> void:
 		tween.tween_property(screen, "modulate:a", 0.0, fade_out_time)
 		tween.tween_interval(out_time)
 		await tween.finished
-	GlobalController.game_controller.change_2d_scene(firstScene, false)
+	GlobalController.game_controller.change_2d_scene(firstScene)
 	GlobalController.game_controller.change_gui_scene(background, false)
 
 func _ready() -> void:
