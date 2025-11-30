@@ -1,54 +1,55 @@
-Name,Description,Type,Method,InputsReq,,,,Count,Pack
-a+b,,Function,ADD,AnUn,,,,4,Core0
-a-b,,Function,SUBTRACT,AnUn,,,,4,Core0
-a*b,,Function,MULTIPLY,AnUn,,,,4,Core0
-a/b,,Function,DIVIDE,AnUn,,,,4,Core0
-|a|,,Function,ABSOLUTEVALUE,An,,,,2,Core1
-1/a,,Function,INVERSE,An,,,,2,Core1
--a,,Function,NEGATIVE,An,,,,2,Core1
-+a,,Function,POSITIVE,An,,,,2,Core1
-sqrt[a],,Function,SQRT,An,,,,1,Core3
-d!,,Function,FACTORIAL,d,,,,1,Core3
-a^2,,Function,SQUARE,An,,,,1,Core3
-a[cos(d)],,Function,COSMOD,And,,,,1,Core3
-log_10[a],,Function,LOG10,An,,,,1,Core3
-e^a,,Function,EXPONENTIAL,An,,,,1,Core3
-ln(a),,Function,NATLOG,An,,,,1,Core3
-a[sin(d)],,Function,SINMOD,And,,,,1,Core3
-a[tan(d)],,Function,TANMOD,And,,,,1,Core3
-log_d[a],,Function,LOGORHYTHM,And,,,,1,Core3
-a^(1/d),,Function,ROOTBASE,And,,,,1,Core3
-a^d,,Function,EXPONENTBASE,And,,,,1,Core3
-Summation,,Function,SIGMANOTATION,Ap,,,,1,Core3
-Product,,Function,PRODUCTNOTATION,Ap,,,,1,Core3
-ad^2+bd+c,Second Order Polynomial,Function,POLYNOMIAL2,AnUnUndd,,,,1,Core3
-ad+b,First Order Polynomial,Function,POLYNOMIAL1,AnUnd,,,,1,Core3
-Identity Element,Add 0 (zero) or multiply by 1.,Theorem,ELEMENTIDENTITY,An,,,,1,Core
-Closure Element,Make one number immune from cards for one turn.,Theorem,ELEMENTCLOSURE,An,,,,1,Core
-Distributive Element,Select a number on the table and dublicate it into every player's set.,Theorem,ELEMENTDISTRIBUTIVE,An,,,,1,Core
-Commutative Element,Swap any two numbers on the table,Theorem,ELEMENTCOMMUTATIVE,AnAn,,,,1,Core
-Inverse Element,Re-roll the dice.,Theorem,ELEMENTINVERSE,Ac,,,,1,Core
-Identity Property,Cancel all cards used on a number.,Theorem,PROPERTYIDENTITY,An,,,,1,Core
-Closure Property,Repeat previous operation.,Theorem,PROPERTYCLOSURE,An,,,,1,Core
-Distributive Property,Apply all cards from a number to other number. [Imagine as duplicating all the operations applied on one card and applying them to a new chosen card.],Theorem,PROPERTYDISTRIBUTIVE,An,,,,1,Core
-Commutative Property,Swap any two cards on the table.,Theorem,PROPERTYCOMMUTATIVE,AcAc,,,,1,Core
-Inverse Property,Cancel the last card used.,Theorem,PROPERTYINVERSE,Ac,,,,1,Core
-Pascal's Triangle,"Choose two adjacent numbers and replace them with their sum [recursive, you can perform as many times as you want.]",Theorem,PASCALTRIANGLE,AcAcOAc,,,,1,Core
-sqrt[a^2+b^2],Pythagorean Theorem,Theorem,PYTHAGOREANTHEOREM,AnUn,,,,1,Core
-Fundamental Theorem of Arithmetic,Replace the number with its prime decomposition set.,Theorem,FUNDAMENTALTHEOREMOFARITHMETIC,An,,,,1,Core
-e \approx 2.72,,Constant,CONSTE,Up,,,,1,Core
--1,,Constant,CONST-1,Up,,,,1,Core
-73,"The best number. Is this 73? Nah, check if 73 is in your set, if yes: use this as 73; if no: use this as 12.",Constant,CONST73,Up,,,,1,Core
-Googol,Just 10 or search for a number on the table which is integer power of 10 and take one into your own set.,Constant,CONSTGOOGLE,An,,,,1,Core
-42,What else do you think the meaning of the universe is?,Constant,CONST42,Up,,,,1,Core
-\phi \approx 1.62,,Constant,CONSTPHI,Up,,,,1,Core
-0,Zero,Constant,CONSTZERO,Up,,,,1,Core
-\pi \approx 3.14,,Constant,CONSTPI,Up,,,,1,Core
-7,"Roll the dice 2 times, if the sum is 7, add another 7 to the set.",Constant,CONST7,Up,,,,1,Core
-28,2nd perfect number. You're even more perfect!,Constant,CONST26,Up,,,,1,Core
-6,1st perfect number. You're perfect!,Constant,CONST6,Up,,,,1,Core
-F,"Fibonacci Number: Every turn it is on the table without being used, it increases into the next Fibonacci number in the sequence. Starts from 1, stops once it's used or attacked.",Constant,CONSTFIBONACCI,Up,,,,1,Core
-69,Uhm... it is divisible by 3?,Constant,CONST69,Up,,,,1,Core
-\tau \approx 6.28,,Constant,CONSTTAU,Up,,,,1,Core
-10^d,,Constant,CONSTTENPOWER,Upd,,,,1,Core
-"""Graham's number""","It's too big, just replace it with 9.",Constant,CONSTGRAHAM,Up,,,,1,Core
+Name,SVG,Description,Type,Method,InputsReq,Count,Pack
+Addition,a+b,,Function,ADD,AnUn,4,Core0
+Subtraction,a-b,,Function,SUBTRACT,AnUn,4,Core0
+Multiplication,a*b,,Function,MULTIPLY,AnUn,4,Core0
+Division,a/b,,Function,DIVIDE,AnUn,4,Core0
+Absolute Value,|a|,,Function,ABSOLUTEVALUE,An,2,Core1
+Inverse,1/a,,Function,INVERSE,An,2,Core1
+Negative,-a,,Function,NEGATIVE,An,2,Core1
+Positive,+a,,Function,POSITIVE,An,2,Core1
+Square Root,sqrt[a],,Function,SQRT,An,1,Core3
+Factorial,d!,,Function,FACTORIAL,d,1,Core3
+Square,a^2,,Function,SQUARE,An,1,Core3
+Cosine,a[cos(d)],,Function,COSMOD,And,1,Core3
+Base-10 Logarithm,log_10[a],,Function,LOG10,An,1,Core3
+Exponential,e^a,,Function,EXPONENTIAL,An,1,Core3
+Natural Logarithm,ln(a),,Function,NATLOG,An,1,Core3
+Sine,a[sin(d)],,Function,SINMOD,And,1,Core3
+Tangent,a[tan(d)],,Function,TANMOD,And,1,Core3
+Logarithm,log_d[a],,Function,LOGORHYTHM,And,1,Core3
+Base-Root,a^(1/d),,Function,ROOTBASE,And,1,Core3
+Power,a^d,,Function,EXPONENTBASE,And,1,Core3
+Summation,sigma{},,Function,SIGMANOTATION,Ap,1,Core3
+Product,product{},,Function,PRODUCTNOTATION,Ap,1,Core3
+Second Order Polynomial,ad^2+bd+c,,Function,POLYNOMIAL2,AnUnUndd,1,Core3
+First Order Polynomial,ad+b,,Function,POLYNOMIAL1,AnUnd,1,Core3
+Identity Element,,Add 0 (zero) or multiply by 1.,Theorem,ELEMENTIDENTITY,An,1,Core
+Closure Element,,Make one number immune from cards for one turn.,Theorem,ELEMENTCLOSURE,An,1,Core
+Distributive Element,,Select a number on the table and dublicate it into every player's set.,Theorem,ELEMENTDISTRIBUTIVE,An,1,Core
+Commutative Element,,Swap any two numbers on the table,Theorem,ELEMENTCOMMUTATIVE,AnAn,1,Core
+Inverse Element,,Re-roll the dice.,Theorem,ELEMENTINVERSE,Ac,1,Core
+Identity Property,,Cancel all cards used on a number.,Theorem,PROPERTYIDENTITY,An,1,Core
+Closure Property,,Repeat previous operation.,Theorem,PROPERTYCLOSURE,An,1,Core
+Distributive Property,,Apply all cards from a number to other number. [Imagine as duplicating all the operations applied on one card and applying them to a new chosen card.],Theorem,PROPERTYDISTRIBUTIVE,An,1,Core
+Commutative Property,,Swap any two cards on the table.,Theorem,PROPERTYCOMMUTATIVE,AcAc,1,Core
+Inverse Property,,Cancel the last card used.,Theorem,PROPERTYINVERSE,Ac,1,Core
+Pascal's Triangle,,"Choose two adjacent numbers and replace them with their sum [recursive, you can perform as many times as you want.]",Theorem,PASCALTRIANGLE,AnXYi,1,Core
+Pythagorean Theorem,sqrt[a^2+b^2],,Theorem,PYTHAGOREANTHEOREM,AnUn,1,Core
+Fundamental Theorem of Arithmetic,,Replace the number with its prime decomposition set.,Theorem,FUNDAMENTALTHEOREMOFARITHMETIC,An,1,Core
+Euler's Number,e \approx 2.72,,Constant,CONSTE,Up,1,Core
+Negative,-1,,Constant,CONST-1,Up,1,Core
+Sheldon's Number,73,"The best number. Is this 73? Nah, check if 73 is in your set, if yes: use this as 73; if no: use this as 12.",Constant,CONST73,Up,1,Core
+Googol,,Just 10 or search for a number on the table which is integer power of 10 and take one into your own set.,Constant,CONSTGOOGLE,An,1,Core
+The Answer,42,What else do you think the meaning of the universe is?,Constant,CONST42,Up,1,Core
+Phi,\phi \approx 1.62,,Constant,CONSTPHI,Up,1,Core
+Zero,0,Zero,Constant,CONSTZERO,Up,1,Core
+Pi,\pi \approx 3.14,,Constant,CONSTPI,Up,1,Core
+Lucky Number,7,"Roll the dice 2 times, if the sum is 7, add another 7 to the set.",Constant,CONST7,Updd,1,Core
+2nd Perfect Number,28,You're even more perfect!,Constant,CONST26,Up,1,Core
+1st Perfect Number,6,You're perfect!,Constant,CONST6,Up,1,Core
+Fibonacci Number,F,"Every turn it is on the table without being used, it increases into the next Fibonacci number in the sequence. Starts from 1, stops once it's used or attacked.",Constant,CONSTFIBONACCI,Up,1,Core
+Symmetrical Number,69,Uhm... it is divisible by 3?,Constant,CONST69,Up,1,Core
+Tau,\tau \approx 6.28,,Constant,CONSTTAU,Up,1,Core
+Scientific Notation,10^d,,Constant,CONSTTENPOWER,Upd,1,Core
+Graham's number,,"It's too big, just replace it with 9.",Constant,CONSTGRAHAM,Up,1,Core
+Cupid's Number,29,"Roll the dice twice. If and only if both dice are three or less, the constant is 29. Otherwise it is 14.",Constant,CONSTCUPID,dd,1,Core

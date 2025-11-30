@@ -1,7 +1,10 @@
 package engine
 
 import (
+	"matetra/cards"
 	"matetra/model"
+	"matetra/utils"
+	"math/rand"
 )
 
 type Game struct {
@@ -40,40 +43,87 @@ func (g *Game) AddPlayer(name, hash string) error {
 	return nil
 }
 
-// Adds a new card to the game
-func (g *Game) AddCard(card model.Card) {
-	g.State.Cards = append(g.State.Cards, card)
+// Loads the card deck into game state
+func (g *Game) LoadCards() {
+	deck := utils.Must(cards.LoadCardsFromCSV(utils.DECK_PATH))
+	g.State.Cards = append(g.State.Cards, deck...)
 }
 
 // Check if everyone has finished the turn
 func (g *Game) TurnsFinished() bool {
-	// Iterate over the list of players, if everyone is finished, return true, if not - false.
-	return false
+	for _, done := range g.State.Done {
+		if !done {
+			return false
+		}
+	}
+	return true
 }
 
 // Checks how many cards does the player have
 func (g *Game) PlayerHandCount(player int) int {
-	// Checks how many cards does the player have
-	return 0
-}
-
-// Draws a card from deck to a player
-func (g *Game) RestockCard(player int) {
-	// Pick a random card from the deck
-	// (If there are no more cards3 in the deck, make all the used cards into deck cards)
-	// Assign that card's owner to a user
+	count := 0
+	for _, card := range g.State.Cards {
+		if card.Owner == player {
+			count++
+		}
+	}
+	return count
 }
 
 // Fills everyone's hands up (6 cards max)
 func (g *Game) RestockCards() {
-	// For every player
-	// 	Count amount of cards they have.
-	// 	Restock the cards to fill the hands back up. (Use the RestockCard function)
+	for p := range g.State.Players {
+		hand := g.PlayerHandCount(p)
+
+		for hand < 6 {
+			// Build a deck
+			deck := []int{}
+			for i, c := range g.State.Cards {
+				if c.Owner == -1 {
+					deck = append(deck, i)
+				}
+			}
+
+			// If deck is empty, recycle used cards and build a deck
+			if len(deck) == 0 {
+				for i := range g.State.Cards {
+					if g.State.Cards[i].Owner == -2 {
+						g.State.Cards[i].Owner = -1
+					}
+				}
+
+				for i, c := range g.State.Cards {
+					if c.Owner == -1 {
+						deck = append(deck, i)
+					}
+				}
+			}
+
+			// Choose a card from a deck
+			idx := deck[rand.Intn(len(deck))]
+			g.State.Cards[idx].Owner = p
+			hand++
+		}
+	}
 }
 
 // Applies the card's actions (if pernament: do it, if not: only return what will happen if everything is applied)
 func (g *Game) ApplyCard(cardID string, pernament bool) { // idk what to return here
-	// applies a singular card
+	// Make a new VirtualGameState which copies everything from a game state
+	virtualGameState := &model.GameState{
+		GameID:  g.State.GameID,
+		Players: append([]model.Player(nil), g.State.Players...),
+		Cards:   append([]model.Card(nil), g.State.Cards...),
+		Numbers: make([][5]string, len(g.State.Numbers)),
+		Done:    append([]bool(nil), g.State.Done...),
+		Queue:   append([]string(nil), g.State.Queue...),
+		Turn:    g.State.Turn,
+	}
+	copy(virtualGameState.Numbers, g.State.Numbers)
+	// cards.CardFunction(virtualGameState.Numbers, g.State.Numbers)
+	// Call the CardFunction
+	// If pernament, replace the GameState with the VirtualGameState
+	// Clean up the card data and set it as used
 }
 
 // Applies the card actions for all cards (if pernament: do it, if not: only return what will happen if everything is applied)

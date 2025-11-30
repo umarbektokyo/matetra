@@ -12,7 +12,7 @@ import (
 // Loads cards from csv file
 func LoadCardsFromCSV(path string) ([]model.Card, error) {
 	// Open the file
-	file := utils.Must(os.Open("cards.csv"))
+	file := utils.Must(os.Open(path))
 	defer file.Close()
 
 	// Read through the file and clean the data
@@ -27,7 +27,7 @@ func LoadCardsFromCSV(path string) ([]model.Card, error) {
 
 	// Add each card (row)
 	for _, row := range records {
-		count := utils.Must(strconv.Atoi(row[7]))
+		count := utils.Must(strconv.Atoi(row[6]))
 
 		// Add multiple copies if necessary
 		for i := 0; i < count; i++ {
@@ -35,16 +35,36 @@ func LoadCardsFromCSV(path string) ([]model.Card, error) {
 			card := model.Card{
 				ID:          fmt.Sprintf("%s_%d", row[0], idCounter),
 				Name:        row[0],
-				Description: row[1],
-				Type:        row[2],
-				Method:      row[3],
-				InputsReq:   row[4],
+				Description: row[2],
+				Type:        row[3],
+				Method:      row[4],
+				InputsReq:   row[5],
 				Owner:       -1,
-				Target:      [][2]int{},
-				Inputs:      [][2]int{},
+				Inputs:      []interface{}{},
 			}
 			cards = append(cards, card)
 		}
 	}
 	return cards, nil
+}
+
+func CardFunction(virtualGameState *model.GameState, cardID string, pernament bool) {
+	// Get the currently used card
+	var card *model.Card
+	for i := range virtualGameState.Cards {
+		if virtualGameState.Cards[i].ID == cardID {
+			card = &virtualGameState.Cards[i]
+			break
+		}
+	}
+
+	// Get the method from the card
+	method := card.Method
+
+	switch method {
+	case "ADD":
+		// return functions.ADD() // input the card's Inputs
+	case "SUBTRACT":
+		// return functions.SUBTRACT()
+	}
 }

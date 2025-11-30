@@ -5,19 +5,21 @@ type Card struct {
 	Name        string
 	Description string
 	Type        string
-	Method      string   // Defines what method in code will be taken
-	Owner       int      // -1: deck, -2: used, User.ID: owner
-	Target      [][2]int // list of [Player.id, Numbers[index]] for every target
-	Inputs      [][2]int // list of [Player.ID, Numbers[index]]
-	InputsReq   string   // string with each character signifying input number type.
+	Method      string        // Defines what method in code will be taken
+	Owner       int           // -1: deck, -2: used, User.ID: owner
+	Inputs      []interface{} // list of ints and str
+	InputsReq   string        // string with each character signifying input number type.
 	// InputsReq explained:
-	// d: dice
+	// d: dice (int)
 	// O: makes the next digit optional
 	// U: makes next digit user's
 	// A: Makes next digit attacked one
-	// n: number
-	// c: card
-	// p: player
+	// n: number (int)
+	// c: card, id (string)
+	// p: player (int)
+	// X: minimum for the input (int)
+	// Y: maximum for the input (int)
+	// i: allow input for a user (int)
 }
 
 // Only for authentication
