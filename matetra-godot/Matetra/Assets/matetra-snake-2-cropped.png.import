@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dfxchqq6unlgy"
-path="res://.godot/imported/matetra-snake-2-cropped.png-cd5b7f04fca51ca0435808bf802dbac6.ctex"
+path="res://.godot/imported/matetra-snake-2-cropped.png-de472d7bdef85aa3017bc90d9aef9a99.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://matetra-snake-2-cropped.png"
-dest_files=["res://.godot/imported/matetra-snake-2-cropped.png-cd5b7f04fca51ca0435808bf802dbac6.ctex"]
+source_file="res://Assets/matetra-snake-2-cropped.png"
+dest_files=["res://.godot/imported/matetra-snake-2-cropped.png-de472d7bdef85aa3017bc90d9aef9a99.ctex"]
 
 [params]
 
