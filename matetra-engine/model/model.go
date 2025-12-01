@@ -1,5 +1,7 @@
 package model
 
+import "math/big"
+
 type Card struct {
 	ID          string // Unique Identifier for every card, even if a dublicate id is different
 	Name        string
@@ -28,12 +30,20 @@ type Player struct {
 	Hash string
 }
 
+type Number struct {
+	Value *big.Int
+	Mark  string
+	// n: null
+	// F: fibonacci
+	//
+}
+
 // Main Game Object
 type GameState struct {
 	GameID  string
 	Players []Player
 	Cards   []Card
-	Numbers [][5]string
+	Numbers [][5]Number
 	Done    []bool
 	Queue   []string // stores CardID's and every time the move is finished, we apply all the cards and cleane the data in them, marking them as used.
 	Turn    int      // total turns elapsed; current player = Turn % len(Players)

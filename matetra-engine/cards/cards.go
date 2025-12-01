@@ -3,6 +3,7 @@ package cards
 import (
 	"encoding/csv"
 	"fmt"
+	"matetra/cards/functions"
 	"matetra/model"
 	"matetra/utils"
 	"os"
@@ -48,23 +49,24 @@ func LoadCardsFromCSV(path string) ([]model.Card, error) {
 	return cards, nil
 }
 
-func CardFunction(virtualGameState *model.GameState, cardID string, pernament bool) {
+func CardFunction(vgs *model.GameState, cardID string) {
 	// Get the currently used card
 	var card *model.Card
-	for i := range virtualGameState.Cards {
-		if virtualGameState.Cards[i].ID == cardID {
-			card = &virtualGameState.Cards[i]
+	for i := range vgs.Cards {
+		if vgs.Cards[i].ID == cardID {
+			card = &vgs.Cards[i]
 			break
 		}
 	}
 
-	// Get the method from the card
-	method := card.Method
+	if card == nil {
+		return
+	}
 
-	switch method {
+	switch card.Method {
 	case "ADD":
-		// return functions.ADD() // input the card's Inputs
+		functions.ADD(vgs, card)
 	case "SUBTRACT":
-		// return functions.SUBTRACT()
+		functions.SUBTRACT(vgs, card)
 	}
 }

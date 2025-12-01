@@ -4,6 +4,7 @@ import (
 	"matetra/cards"
 	"matetra/model"
 	"matetra/utils"
+	"math/big"
 	"math/rand"
 )
 
@@ -18,11 +19,18 @@ func New(gameID string) *Game {
 			GameID:  gameID,
 			Players: []model.Player{},
 			Cards:   []model.Card{},
-			Numbers: [][5]string{},
+			Numbers: [][5]model.Number{},
 			Done:    []bool{},
 			Queue:   []string{},
 			Turn:    0,
 		},
+	}
+}
+
+func NewNumber() model.Number {
+	return model.Number{
+		Value: big.NewInt(0),
+		Mark:  "n",
 	}
 }
 
@@ -38,7 +46,11 @@ func (g *Game) CurrentPlayer() int {
 // Adds a new player to the game
 func (g *Game) AddPlayer(name, hash string) error {
 	g.State.Players = append(g.State.Players, model.Player{Name: name, Hash: hash})
-	g.State.Numbers = append(g.State.Numbers, [5]string{"0", "0", "0", "0", "0"})
+	nums := [5]model.Number{}
+	for i := 0; i < 5; i++ {
+		nums[i] = NewNumber()
+	}
+	g.State.Numbers = append(g.State.Numbers, nums)
 	g.State.Done = append(g.State.Done, false)
 	return nil
 }
@@ -107,34 +119,64 @@ func (g *Game) RestockCards() {
 	}
 }
 
-// Applies the card's actions (if pernament: do it, if not: only return what will happen if everything is applied)
-func (g *Game) ApplyCard(cardID string, pernament bool) { // idk what to return here
-	// Make a new VirtualGameState which copies everything from a game state
-	virtualGameState := &model.GameState{
+// Makes a virtual deep copy of the game state
+func (g *Game) copyState() *model.GameState {
+	virtual := &model.GameState{
 		GameID:  g.State.GameID,
 		Players: append([]model.Player(nil), g.State.Players...),
 		Cards:   append([]model.Card(nil), g.State.Cards...),
-		Numbers: make([][5]string, len(g.State.Numbers)),
+		Numbers: make([][5]model.Number, len(g.State.Numbers)),
 		Done:    append([]bool(nil), g.State.Done...),
 		Queue:   append([]string(nil), g.State.Queue...),
 		Turn:    g.State.Turn,
 	}
-	copy(virtualGameState.Numbers, g.State.Numbers)
-	// cards.CardFunction(virtualGameState.Numbers, g.State.Numbers)
-	// Call the CardFunction
-	// If pernament, replace the GameState with the VirtualGameState
-	// Clean up the card data and set it as used
+
+	for i := range g.State.Numbers {
+		for j := 0; j < 5; j++ {
+			orig := g.State.Numbers[i][j]
+			virtual.Numbers[i][j] = model.Number{
+				Mark:  orig.Mark,
+				Value: new(big.Int).Set(orig.Value),
+			}
+		}
+	}
+
+	return virtual
 }
 
-// Applies the card actions for all cards (if pernament: do it, if not: only return what will happen if everything is applied)
+// Applies a singular card
+func (g *Game) ApplyCard(vgs *model.GameState, cardID string) {
+	cards.CardFunction(vgs, cardID)
+
+	// Remove card after applying
+	for i := range vgs.Cards {
+		if vgs.Cards[i].ID == cardID {
+			vgs.Cards[i].Owner = -2
+			vgs.Cards[i].Inputs = nil
+			break
+		}
+	}
+}
+
+// Applies all the Cards in Queue
 func (g *Game) ApplyCards(pernament bool) {
-	// iterates the applycard for every card in the queue
+	virtual := g.copyState()
+
+	for _, cardID := range g.State.Queue {
+		g.ApplyCard(virtual, cardID)
+	}
+
+	virtual.Queue = nil
+
+	if pernament {
+		g.State = virtual
+	}
 }
 
 // Ends a player's turn
 func (g *Game) EndTurn() {
 	// Applies All Cards (function)
-	//
+	// Restocks everybody 6 cards
 }
 
 func (g *Game) RecordMove() {

@@ -1,9 +1,11 @@
 package functions
 
-func ADD() { // Arguments are Card's inputs and output is the new Numbers [][5] string for gamestate
-	// Manipulate the new modelState
+import "matetra/model"
+
+func ADD(vgs *model.GameState, card *model.Card) {
+
 }
 
-func SUBTRACT(cardID string, pernament bool) []float64 {
-	return []float64{}
+func SUBTRACT(vgs *model.GameState, card *model.Card) {
+
 }
