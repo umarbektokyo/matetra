@@ -120,7 +120,7 @@ func (g *Game) RestockCards() {
 }
 
 // Makes a virtual deep copy of the game state
-func (g *Game) copyState() *model.GameState {
+func (g *Game) CopyState() *model.GameState {
 	virtual := &model.GameState{
 		GameID:  g.State.GameID,
 		Players: append([]model.Player(nil), g.State.Players...),
@@ -145,8 +145,11 @@ func (g *Game) copyState() *model.GameState {
 }
 
 // Applies a singular card
-func (g *Game) ApplyCard(vgs *model.GameState, cardID string) {
-	cards.CardFunction(vgs, cardID)
+func (g *Game) ApplyCard(vgs *model.GameState, cardID string) error {
+	err := cards.CardFunction(vgs, cardID)
+	if err != nil {
+		return err
+	}
 
 	// Remove card after applying
 	for i := range vgs.Cards {
@@ -156,14 +159,19 @@ func (g *Game) ApplyCard(vgs *model.GameState, cardID string) {
 			break
 		}
 	}
+
+	return nil
 }
 
 // Applies all the Cards in Queue
-func (g *Game) ApplyCards(pernament bool) {
-	virtual := g.copyState()
+func (g *Game) ApplyCards(pernament bool) (*model.GameState, error) {
+	virtual := g.CopyState()
 
 	for _, cardID := range g.State.Queue {
-		g.ApplyCard(virtual, cardID)
+		err := g.ApplyCard(virtual, cardID)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	virtual.Queue = nil
@@ -171,12 +179,16 @@ func (g *Game) ApplyCards(pernament bool) {
 	if pernament {
 		g.State = virtual
 	}
+
+	return virtual, nil
 }
 
 // Ends a player's turn
 func (g *Game) EndTurn() {
 	// Applies All Cards (function)
 	// Restocks everybody 6 cards
+	g.RestockCards()
+	// Increment the GameState's player
 }
 
 func (g *Game) RecordMove() {

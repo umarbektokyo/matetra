@@ -49,9 +49,9 @@ func LoadCardsFromCSV(path string) ([]model.Card, error) {
 	return cards, nil
 }
 
-func CardFunction(vgs *model.GameState, cardID string) {
-	// Get the currently used card
+func CardFunction(vgs *model.GameState, cardID string) error {
 	var card *model.Card
+
 	for i := range vgs.Cards {
 		if vgs.Cards[i].ID == cardID {
 			card = &vgs.Cards[i]
@@ -60,13 +60,17 @@ func CardFunction(vgs *model.GameState, cardID string) {
 	}
 
 	if card == nil {
-		return
+		return fmt.Errorf("card %s not found", cardID)
 	}
 
 	switch card.Method {
 	case "ADD":
-		functions.ADD(vgs, card)
+		return functions.ADD(vgs, card)
+
 	case "SUBTRACT":
-		functions.SUBTRACT(vgs, card)
+		return functions.SUBTRACT(vgs, card)
+
+	default:
+		return fmt.Errorf("unknown card method %s", card.Method)
 	}
 }
