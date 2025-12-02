@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"fmt"
 	"matetra/cards"
 	"matetra/model"
 	"matetra/utils"
@@ -19,9 +20,9 @@ func New(gameID string) *Game {
 			GameID:  gameID,
 			Players: []model.Player{},
 			Cards:   []model.Card{},
-			Numbers: [][5]model.Number{},
-			Done:    []bool{},
-			Queue:   []string{},
+			Numbers: make([][5]model.Number, 0),
+			Done:    make([]bool, 0),
+			Queue:   make([]string, 0),
 			Turn:    0,
 		},
 	}
@@ -34,6 +35,29 @@ func NewNumber() model.Number {
 	}
 }
 
+func NewNumberRow() (row [5]model.Number) {
+	for i := range row {
+		row[i] = NewNumber()
+	}
+	return
+}
+
+// Adds a new player to the game
+func (g *Game) AddPlayer(name, hash string) error {
+	// Adds a new player object
+	g.State.Players = append(g.State.Players, model.Player{
+		Name: name,
+		Hash: hash,
+	})
+
+	// Adds a new number row
+	g.State.Numbers = append(g.State.Numbers, NewNumberRow())
+
+	// Adds a new 'not done' flag
+	g.State.Done = append(g.State.Done, false)
+	return nil
+}
+
 // Return the index of the player whoose turn it is
 func (g *Game) CurrentPlayer() int {
 	n := len(g.State.Players)
@@ -41,18 +65,6 @@ func (g *Game) CurrentPlayer() int {
 		return -1
 	}
 	return g.State.Turn % n
-}
-
-// Adds a new player to the game
-func (g *Game) AddPlayer(name, hash string) error {
-	g.State.Players = append(g.State.Players, model.Player{Name: name, Hash: hash})
-	nums := [5]model.Number{}
-	for i := 0; i < 5; i++ {
-		nums[i] = NewNumber()
-	}
-	g.State.Numbers = append(g.State.Numbers, nums)
-	g.State.Done = append(g.State.Done, false)
-	return nil
 }
 
 // Loads the card deck into game state
@@ -82,7 +94,7 @@ func (g *Game) PlayerHandCount(player int) int {
 	return count
 }
 
-// Fills everyone's hands up (6 cards max)
+// Fills everyone's hands up (6 cards max) (needs optimisation)
 func (g *Game) RestockCards() {
 	for p := range g.State.Players {
 		hand := g.PlayerHandCount(p)
@@ -183,14 +195,54 @@ func (g *Game) ApplyCards(pernament bool) (*model.GameState, error) {
 	return virtual, nil
 }
 
-// Ends a player's turn
-func (g *Game) EndTurn() {
-	// Applies All Cards (function)
-	// Restocks everybody 6 cards
-	g.RestockCards()
-	// Increment the GameState's player
+func (g *Game) IncrementPlayer() {
+	g.State.Turn += 1
 }
 
-func (g *Game) RecordMove() {
+// Ends a player's turn
+func (g *Game) EndTurn() {
+	g.ApplyCards(true)
+	g.RestockCards()
+	g.IncrementPlayer()
+}
 
+// Records a card move into a GameState
+func (g *Game) RecordMove(cardID string, inputs []interface{}) error {
+	// Find the card
+	cardIndex := -1
+	for i, c := range g.State.Cards {
+		if c.ID == cardID {
+			cardIndex = i
+			break
+		}
+	}
+	if cardIndex == -1 {
+		return fmt.Errorf("card with ID %s not found", cardID)
+	}
+
+	// Validade input length
+	expected := CountRequiredInputs(g.State.Cards[cardIndex].InputsReq)
+	if len(inputs) != expected {
+		return fmt.Errorf("expected %d inputs but got %d", expected, len(inputs))
+	}
+
+	// Store inputs in GameState's Card
+	card := &g.State.Cards[cardIndex]
+	card.Inputs = inputs
+
+	// Add the cardID to the queue
+	g.State.Queue = append(g.State.Queue, cardID)
+
+	return nil
+}
+
+// Count the number of required inputs, aka lowercase letters
+func CountRequiredInputs(req string) int {
+	count := 0
+	for _, ch := range req {
+		if ch >= 'a' && ch <= 'z' {
+			count++
+		}
+	}
+	return count
 }
