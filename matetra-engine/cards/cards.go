@@ -24,7 +24,6 @@ func LoadCardsFromCSV(path string) ([]model.Card, error) {
 
 	// Start recording the cards
 	var cards []model.Card
-	idCounter := 0
 
 	// Add each card (row)
 	for _, row := range records {
@@ -32,9 +31,7 @@ func LoadCardsFromCSV(path string) ([]model.Card, error) {
 
 		// Add multiple copies if necessary
 		for i := 0; i < count; i++ {
-			idCounter++
 			card := model.Card{
-				ID:          fmt.Sprintf("%s_%d", row[0], idCounter),
 				Name:        row[0],
 				Description: row[2],
 				Type:        row[3],
@@ -49,19 +46,10 @@ func LoadCardsFromCSV(path string) ([]model.Card, error) {
 	return cards, nil
 }
 
-func CardFunction(vgs *model.GameState, cardID string) error {
+func CardFunction(vgs *model.GameState, cardIndex int) error {
 	var card *model.Card
 
-	for i := range vgs.Cards {
-		if vgs.Cards[i].ID == cardID {
-			card = &vgs.Cards[i]
-			break
-		}
-	}
-
-	if card == nil {
-		return fmt.Errorf("card %s not found", cardID)
-	}
+	card = &vgs.Cards[cardIndex]
 
 	switch card.Method {
 	case "ADD":

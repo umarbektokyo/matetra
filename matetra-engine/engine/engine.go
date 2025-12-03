@@ -22,8 +22,8 @@ func New(gameID string) *Game {
 			Cards:   []model.Card{},
 			Numbers: make([][5]model.Number, 0),
 			Done:    make([]bool, 0),
-			Queue:   make([]string, 0),
-			Turn:    0,
+			Queue:   make([]int, 0),
+			Turn:    -1,
 		},
 	}
 }
@@ -139,7 +139,7 @@ func (g *Game) CopyState() *model.GameState {
 		Cards:   append([]model.Card(nil), g.State.Cards...),
 		Numbers: make([][5]model.Number, len(g.State.Numbers)),
 		Done:    append([]bool(nil), g.State.Done...),
-		Queue:   append([]string(nil), g.State.Queue...),
+		Queue:   append([]int(nil), g.State.Queue...),
 		Turn:    g.State.Turn,
 	}
 
@@ -157,20 +157,15 @@ func (g *Game) CopyState() *model.GameState {
 }
 
 // Applies a singular card
-func (g *Game) ApplyCard(vgs *model.GameState, cardID string) error {
-	err := cards.CardFunction(vgs, cardID)
+func (g *Game) ApplyCard(vgs *model.GameState, cardIndex int) error {
+	err := cards.CardFunction(vgs, cardIndex)
 	if err != nil {
 		return err
 	}
 
 	// Remove card after applying
-	for i := range vgs.Cards {
-		if vgs.Cards[i].ID == cardID {
-			vgs.Cards[i].Owner = -2
-			vgs.Cards[i].Inputs = nil
-			break
-		}
-	}
+	vgs.Cards[cardIndex].Owner = -2
+	vgs.Cards[cardIndex].Inputs = nil
 
 	return nil
 }
@@ -179,8 +174,8 @@ func (g *Game) ApplyCard(vgs *model.GameState, cardID string) error {
 func (g *Game) ApplyCards(pernament bool) (*model.GameState, error) {
 	virtual := g.CopyState()
 
-	for _, cardID := range g.State.Queue {
-		err := g.ApplyCard(virtual, cardID)
+	for _, cardIndex := range g.State.Queue {
+		err := g.ApplyCard(virtual, cardIndex)
 		if err != nil {
 			return nil, err
 		}
@@ -200,26 +195,17 @@ func (g *Game) IncrementPlayer() {
 }
 
 // Ends a player's turn
-func (g *Game) EndTurn() {
-	g.ApplyCards(true)
+func (g *Game) NextTurn() {
+	_, err := g.ApplyCards(true)
+	if err != nil {
+		panic(err)
+	}
 	g.RestockCards()
 	g.IncrementPlayer()
 }
 
 // Records a card move into a GameState
-func (g *Game) RecordMove(cardID string, inputs []int) error {
-	// Find the card
-	cardIndex := -1
-	for i, c := range g.State.Cards {
-		if c.ID == cardID {
-			cardIndex = i
-			break
-		}
-	}
-	if cardIndex == -1 {
-		return fmt.Errorf("card with ID %s not found", cardID)
-	}
-
+func (g *Game) RecordMove(cardIndex int, inputs []int) error {
 	// Validade input length
 	expected := CountRequiredInputs(g.State.Cards[cardIndex].InputsReq)
 	if len(inputs) != expected {
@@ -229,8 +215,8 @@ func (g *Game) RecordMove(cardID string, inputs []int) error {
 	// Store inputs in GameState's Card
 	g.State.Cards[cardIndex].Inputs = append([]int(nil), inputs...)
 
-	// Add the cardID to the queue
-	g.State.Queue = append(g.State.Queue, cardID)
+	// Add the cardIndex to the queue
+	g.State.Queue = append(g.State.Queue, cardIndex)
 
 	return nil
 }

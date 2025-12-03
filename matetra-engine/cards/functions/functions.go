@@ -78,6 +78,10 @@ func DIVIDE(vgs *model.GameState, card *model.Card) error {
 	a := &vgs.Numbers[attackerPlayer][attackerIndex]
 	b := &vgs.Numbers[userPlayer][userIndex]
 
+	if b.Value == big.NewInt(0) {
+		return fmt.Errorf("Cannot divide by zero")
+	}
+
 	a.Value.Div(a.Value, b.Value)
 
 	b.Value = big.NewInt(0)
@@ -105,7 +109,7 @@ func ValidateInputs(vgs *model.GameState, card *model.Card) error {
 			}
 
 		case 'p', 'U', 'A':
-			if val < 0 || val > len(vgs.Players) {
+			if val < 0 || val >= len(vgs.Players) {
 				return fmt.Errorf("input %d must be player index, got %v", i, val)
 			}
 
