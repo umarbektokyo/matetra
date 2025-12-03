@@ -207,7 +207,7 @@ func (g *Game) EndTurn() {
 }
 
 // Records a card move into a GameState
-func (g *Game) RecordMove(cardID string, inputs []interface{}) error {
+func (g *Game) RecordMove(cardID string, inputs []int) error {
 	// Find the card
 	cardIndex := -1
 	for i, c := range g.State.Cards {
@@ -227,8 +227,7 @@ func (g *Game) RecordMove(cardID string, inputs []interface{}) error {
 	}
 
 	// Store inputs in GameState's Card
-	card := &g.State.Cards[cardIndex]
-	card.Inputs = inputs
+	g.State.Cards[cardIndex].Inputs = append([]int(nil), inputs...)
 
 	// Add the cardID to the queue
 	g.State.Queue = append(g.State.Queue, cardID)

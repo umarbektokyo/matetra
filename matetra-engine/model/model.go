@@ -7,18 +7,17 @@ type Card struct {
 	Name        string
 	Description string
 	Type        string
-	Method      string        // Defines what method in code will be taken
-	Owner       int           // -1: deck, -2: used, User.ID: owner
-	Inputs      []interface{} // list of ints and str
-	InputsReq   string        // string with each character signifying input number type.
+	Method      string // Defines what method in code will be taken
+	Owner       int    // -1: deck, -2: used, User.ID: owner
+	Inputs      []int  // length depends on the card
+	InputsReq   string // string with each character signifying input number type.
 	// InputsReq explained:
 	// d: dice (int)
-	// O: makes the next digit optional
+	// p: player (int)
+	// n: number (int)
+	// c: card, id (string) -> doesn't work yet (we have to figure out something as we can't accept strings anymore)
 	// U: makes next digit user's
 	// A: Makes next digit attacked one
-	// n: number (int)
-	// c: card, id (string)
-	// p: player (int)
 	// X: minimum for the input (int)
 	// Y: maximum for the input (int)
 	// i: allow input for a user (int)

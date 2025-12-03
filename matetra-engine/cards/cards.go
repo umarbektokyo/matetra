@@ -41,7 +41,7 @@ func LoadCardsFromCSV(path string) ([]model.Card, error) {
 				Method:      row[4],
 				InputsReq:   row[5],
 				Owner:       -1,
-				Inputs:      []interface{}{},
+				Inputs:      []int{},
 			}
 			cards = append(cards, card)
 		}
