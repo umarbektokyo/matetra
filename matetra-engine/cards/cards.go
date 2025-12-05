@@ -54,10 +54,12 @@ func CardFunction(vgs *model.GameState, cardIndex int) error {
 	switch card.Method {
 	case "ADD":
 		return functions.ADD(vgs, card)
-
 	case "SUBTRACT":
 		return functions.SUBTRACT(vgs, card)
-
+	case "MULTIPLY":
+		return functions.MULTIPLY(vgs, card)
+	case "DIVIDE":
+		return functions.DIVIDE(vgs, card)
 	default:
 		return fmt.Errorf("unknown card method %s", card.Method)
 	}

@@ -61,4 +61,6 @@ func (a *API) handlePlayer(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{
 		"status": "player added",
 	})
+
+	log.Printf("player @%s joined the game!\n", body.Name)
 }

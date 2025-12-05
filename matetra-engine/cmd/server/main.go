@@ -21,7 +21,7 @@ func main() {
 	case "start":
 		if len(cmd) < 3 {
 			fmt.Println("please provide a title for the game.")
-			fmt.Println("(ex: matetra start wonderful_game)")
+			fmt.Println("(ex: matetra start wonderful-game)")
 			return
 		}
 
