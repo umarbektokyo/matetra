@@ -32,6 +32,11 @@ func (a *API) handleState(w http.ResponseWriter, r *http.Request) {
 
 // POST /add-player -> have to implement hashing
 func (a *API) handlePlayer(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	if r.Method != http.MethodPost {
 		http.Error(w, "POST required", http.StatusMethodNotAllowed)
 		return
@@ -43,12 +48,17 @@ func (a *API) handlePlayer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		http.Error(w, "invalid JSON", 400)
+		http.Error(w, "invalid JSON", http.StatusBadRequest)
 		return
 	}
 
 	if err := a.Game.AddPlayer(body.Name, body.Hash); err != nil {
-		http.Error(w, err.Error(), 400)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": "player added",
+	})
 }
