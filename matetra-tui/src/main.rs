@@ -42,51 +42,73 @@ fn render(frame: &mut Frame) {
         .constraints(vec![Constraint::Percentage(60), Constraint::Percentage(40)])
         .split(inner_area);
 
-    let inner_p1 = Paragraph::new("")
+    let team_info_block = Block::new()
         .style(Style::default().fg(ratatui::style::Color::Green))
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .title("team info block")
-                .border_type(BorderType::Rounded),
-        );
+        .borders(Borders::ALL)
+        .border_type(BorderType::Rounded);
 
-    let inner_p2 = Paragraph::new("")
+    let card_info_block = Block::new()
+        .style(Style::default().fg(ratatui::style::Color::LightMagenta))
+        .borders(Borders::ALL)
+        .border_type(BorderType::Rounded);
+
+    frame.render_widget(team_info_block, inner_layout[0]);
+    frame.render_widget(card_info_block, inner_layout[1]);
+
+    let card_upper_info = Paragraph::new("")
         .style(Style::default().fg(ratatui::style::Color::LightCyan))
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .title("card block")
-                .border_type(BorderType::Rounded),
-        );
+        .block(Block::default());
 
-    frame.render_widget(inner_p1, inner_layout[0]);
-    frame.render_widget(inner_p2, inner_layout[1]);
-
-    let card_type = Paragraph::new("")
+    let card_bottom_block = Paragraph::new("")
         .style(Style::default().fg(ratatui::style::Color::LightCyan))
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .border_type(BorderType::Rounded),
-        );
+        .block(Block::default().borders(Borders::ALL));
 
-    let core_thingy = Paragraph::new("")
-        .style(Style::default().fg(ratatui::style::Color::LightCyan))
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .border_type(BorderType::Rounded),
-        );
-
-    let a_f_layout = Layout::default()
+    let card_info_block_layout = Layout::default()
         .constraints(vec![
-            Constraint::Percentage(10),
-            Constraint::Percentage(50),
+            Constraint::Percentage(7),
+            Constraint::Percentage(53),
             Constraint::Percentage(40),
         ])
         .split(inner_layout[1]);
 
-    frame.render_widget(card_type, a_f_layout[0]);
-    frame.render_widget(core_thingy, a_f_layout[2]);
+    frame.render_widget(card_upper_info, card_info_block_layout[0]);
+    frame.render_widget(card_bottom_block, card_info_block_layout[2]);
+
+    let card_info_block_layout = Layout::default()
+        .direction(ratatui::layout::Direction::Horizontal)
+        .constraints(vec![
+            Constraint::Percentage(20),
+            Constraint::Percentage(65),
+            Constraint::Percentage(15),
+        ])
+        .split(card_info_block_layout[0]);
+
+    let card_info_top_left_part = Block::new()
+        .borders(Borders::ALL)
+        .style(Style::default().fg(ratatui::style::Color::LightRed));
+
+    let card_info_top_left_part_paragraph = Paragraph::new("Constant")
+        .style(Style::default())
+        .alignment(ratatui::layout::Alignment::Center);
+
+    let card_info_top_right_part_paragraph = Paragraph::new("Core")
+        .style(Style::default())
+        .alignment(ratatui::layout::Alignment::Center);
+
+    let card_info_top_right_part = Block::new()
+        .borders(Borders::ALL)
+        .style(Style::default().fg(ratatui::style::Color::LightGreen));
+
+    frame.render_widget(
+        card_info_top_left_part_paragraph
+            .clone()
+            .block(card_info_top_left_part),
+        card_info_block_layout[0],
+    );
+    frame.render_widget(
+        card_info_top_right_part_paragraph
+            .clone()
+            .block(card_info_top_right_part),
+        card_info_block_layout[2],
+    );
 }
