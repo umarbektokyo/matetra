@@ -7,10 +7,12 @@ import (
 	"matetra/utils"
 	"math/big"
 	"math/rand"
+	"sync"
 )
 
 type Game struct {
 	State *model.GameState
+	mu    sync.RWMutex
 }
 
 // Initializes a new empty game
@@ -44,6 +46,9 @@ func NewNumberRow() (row [5]model.Number) {
 
 // Adds a new player to the game
 func (g *Game) AddPlayer(name, hash string) error {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
 	// Adds a new player object
 	g.State.Players = append(g.State.Players, model.Player{
 		Name: name,
@@ -202,6 +207,15 @@ func (g *Game) NextTurn() {
 	}
 	g.RestockCards()
 	g.IncrementPlayer()
+}
+
+// Checks if the player is moving their own card
+func (g *Game) PlayerCanPlayCard(playerID, cardIndex int) bool {
+	if cardIndex < 0 || cardIndex >= len(g.State.Cards) {
+		return false
+	}
+
+	return g.State.Cards[cardIndex].Owner == playerID
 }
 
 // Records a card move into a GameState

@@ -20,9 +20,16 @@ type PlayerPayload struct {
 	Hash string `json:"hash"`
 }
 
+type CardPlayPayload struct {
+	CardIndex int   `json:"card_index"`
+	Inputs    []int `json:"inputs"`
+	Permanent bool  `json:"permanent"`
+}
+
 type PlayerConnection struct {
-	conn *websocket.Conn
-	mu   sync.Mutex
+	conn     *websocket.Conn
+	mu       sync.Mutex
+	PlayerID int
 }
 
 type API struct {
@@ -62,7 +69,7 @@ func (a *API) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	playerConn := &PlayerConnection{conn: conn}
+	playerConn := &PlayerConnection{conn: conn, PlayerID: -1}
 	connID := a.nextConnID
 	a.Connections[connID] = playerConn
 	a.nextConnID++
@@ -103,15 +110,52 @@ func (a *API) handleIncomingMessages(pc *PlayerConnection, msg Message) {
 			a.sendError(pc, "invalid player payload format")
 			return
 		}
+
+		playerID := len(a.Game.State.Players)
+
 		if err := a.Game.AddPlayer(payload.Name, payload.Hash); err != nil {
 			a.sendError(pc, err.Error())
 			return
 		}
 
+		pc.PlayerID = playerID
+
 		a.sendResponse(pc, "PLAYER_ADDED", map[string]string{"name": payload.Name})
 		a.BroadcastState()
+	case "PLAY_CARD":
+		a.handlePlayCard(pc, msg.Payload)
 	default:
 		a.sendError(pc, "unknown message type: "+msg.Type)
+	}
+}
+
+func (a *API) handlePlayCard(pc *PlayerConnection, payload interface{}) {
+	if pc.PlayerID == -1 {
+		a.sendError(pc, "player is not authenticated")
+		return
+	}
+
+	var cardPayload CardPlayPayload
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		a.sendError(pc, "error parsing card play payload")
+		return
+	}
+	if err := json.Unmarshal(payloadBytes, &cardPayload); err != nil {
+		a.sendError(pc, "invalid card play payload format")
+		return
+	}
+
+	// Card ownership check
+	if !a.Game.PlayerCanPlayCard(pc.PlayerID, cardPayload.CardIndex) {
+		a.sendError(pc, "you do not own this card")
+		return
+	}
+
+	if cardPayload.Permanent {
+		// We
+	} else {
+
 	}
 }
 
