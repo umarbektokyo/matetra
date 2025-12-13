@@ -1,7 +1,7 @@
 extends Node
 
 # Reference to the NetworkManager
-@onready var network = $"/root/NetworkManager" 
+@onready var network = $"/root/MatetraAPI" 
 
 # Mapping CSV 'InputsReq' characters to descriptions for the UI
 const INPUT_DESCRIPTIONS = {
@@ -62,6 +62,6 @@ func execute_card_action(card_index: int, req_string: String, user_selections: A
 # Call this to know what UI elements to show the player
 func get_requirements_list(req_string: String) -> Array:
 	var requirements = []
-	for char in req_string:
-		requirements.append(INPUT_DESCRIPTIONS.get(char, "Unknown Input"))
+	for chr in req_string:
+		requirements.append(INPUT_DESCRIPTIONS.get(chr, "Unknown Input"))
 	return requirements

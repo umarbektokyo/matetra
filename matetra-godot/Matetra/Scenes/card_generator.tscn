@@ -1,0 +1,40 @@
+[gd_scene load_steps=4 format=3 uid="uid://6imix0qhjfp3"]
+
+[ext_resource type="Script" uid="uid://5ypl1xhj70a2" path="res://Scripts/card_generator.gd" id="1_fk6l7"]
+[ext_resource type="Texture2D" uid="uid://fg18ane1wer5" path="res://Assets/CardInfoSide.png" id="2_x47u2"]
+[ext_resource type="FontFile" uid="uid://dq4f14pyqxh3y" path="res://Miracode.ttf" id="3_x47u2"]
+
+[node name="Card_generator" type="Node2D"]
+script = ExtResource("1_fk6l7")
+
+[node name="CardPNG" type="Sprite2D" parent="."]
+texture = ExtResource("2_x47u2")
+
+[node name="Title" type="RichTextLabel" parent="."]
+offset_left = -228.0
+offset_top = 60.0
+offset_right = 224.0
+offset_bottom = 186.0
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_fonts/normal_font = ExtResource("3_x47u2")
+theme_override_font_sizes/normal_font_size = 70
+bbcode_enabled = true
+text = "Title (9)[font_size=40]
+────────────────────
+[/font_size]"
+scroll_active = false
+horizontal_alignment = 1
+
+[node name="Card_info" type="RichTextLabel" parent="."]
+offset_left = -227.0
+offset_top = 195.0
+offset_right = 226.0
+offset_bottom = 466.0
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_fonts/normal_font = ExtResource("3_x47u2")
+theme_override_font_sizes/normal_font_size = 30
+text = "Information (176)"
+horizontal_alignment = 1
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(0.5, 0.5)

@@ -2,7 +2,7 @@ extends Node
 
 # Signal to notify other parts of the game when state updates
 signal game_state_received(state_data)
-signal connection_established()
+# signal connection_established()
 signal connection_closed()
 
 var socket = WebSocketPeer.new()
