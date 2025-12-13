@@ -2,8 +2,10 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"matetra/engine"
+	"matetra/model"
 	"net/http"
 	"sync"
 
@@ -24,6 +26,12 @@ type CardPlayPayload struct {
 	CardIndex int   `json:"card_index"`
 	Inputs    []int `json:"inputs"`
 	Permanent bool  `json:"permanent"`
+}
+
+type CardPlayReply struct {
+	Success      bool             `json:"success"`
+	Message      string           `json:"message"`
+	NewGameState *model.GameState `json:"newGameState,omitempty"`
 }
 
 type PlayerConnection struct {
@@ -111,9 +119,8 @@ func (a *API) handleIncomingMessages(pc *PlayerConnection, msg Message) {
 			return
 		}
 
-		playerID := len(a.Game.State.Players)
-
-		if err := a.Game.AddPlayer(payload.Name, payload.Hash); err != nil {
+		playerID, err := a.Game.AddPlayer(payload.Name, payload.Hash)
+		if err != nil {
 			a.sendError(pc, err.Error())
 			return
 		}
@@ -131,38 +138,89 @@ func (a *API) handleIncomingMessages(pc *PlayerConnection, msg Message) {
 
 func (a *API) handlePlayCard(pc *PlayerConnection, payload interface{}) {
 	if pc.PlayerID == -1 {
-		a.sendError(pc, "player is not authenticated")
+		a.sendCustomReply(pc, false, "player is not authenticated", nil)
 		return
 	}
 
 	var cardPayload CardPlayPayload
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
-		a.sendError(pc, "error parsing card play payload")
+		a.sendCustomReply(pc, false, "error parsing card play payload", nil)
 		return
 	}
 	if err := json.Unmarshal(payloadBytes, &cardPayload); err != nil {
-		a.sendError(pc, "invalid card play payload format")
+		a.sendCustomReply(pc, false, "invalid card play payload format", nil)
 		return
 	}
 
-	// Card ownership check
-	if !a.Game.PlayerCanPlayCard(pc.PlayerID, cardPayload.CardIndex) {
-		a.sendError(pc, "you do not own this card")
+	resultState, err := a.Game.ProcessMove(
+		pc.PlayerID,
+		cardPayload.CardIndex,
+		cardPayload.Inputs,
+		cardPayload.Permanent,
+	)
+
+	if err != nil {
+		a.sendCustomReply(pc, false, fmt.Sprintf("move failed: %v", err), nil)
 		return
 	}
 
+	message := "non-pernament move previewed successfully"
 	if cardPayload.Permanent {
-		// We
-	} else {
+		playerName := resultState.Players[pc.PlayerID].Name
+		cardName := resultState.Cards[cardPayload.CardIndex].Name
+		message = fmt.Sprintf("@%s used %s!", playerName, cardName)
+		a.BroadcastReply(true, message, resultState)
+		message = "permanent move recorded successfully"
+	}
 
+	a.sendCustomReply(pc, true, message, resultState)
+}
+
+func (a *API) sendCustomReply(pc *PlayerConnection, success bool, message string, state *model.GameState) {
+	reply := CardPlayReply{
+		Success:      success,
+		Message:      message,
+		NewGameState: state,
+	}
+
+	respMsg := Message{
+		Type:    "PLAY_CARD_REPLY",
+		Payload: reply,
+	}
+
+	pc.mu.Lock()
+	if err := pc.conn.WriteJSON(respMsg); err != nil {
+		log.Printf("error sending custom play card reply: %v", err)
+	}
+	pc.mu.Unlock()
+}
+
+func (a *API) BroadcastReply(success bool, message string, state *model.GameState) {
+	reply := CardPlayReply{
+		Success:      success,
+		Message:      message,
+		NewGameState: state,
+	}
+
+	respMsg := Message{
+		Type:    "PLAY_CARD_REPLY",
+		Payload: reply,
+	}
+
+	for _, pc := range a.Connections {
+		pc.mu.Lock()
+		if err := pc.conn.WriteJSON(respMsg); err != nil {
+			log.Printf("error broadcasting reply: %v", err)
+		}
+		pc.mu.Unlock()
 	}
 }
 
 func (a *API) BroadcastState() {
 	stateMsg := Message{
 		Type:    "STATE_UPDATE",
-		Payload: a.Game.State,
+		Payload: a.Game.CopyState(),
 	}
 	for _, pc := range a.Connections {
 		pc.mu.Lock()

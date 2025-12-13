@@ -45,18 +45,19 @@ func NewNumberRow() (row [5]model.Number) {
 }
 
 // Adds a new player to the game
-func (g *Game) AddPlayer(name, hash string) error {
+func (g *Game) AddPlayer(name, hash string) (int, error) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
 	// Adds a new player object
+	playerID := len(g.State.Players)
 	g.State.Players = append(g.State.Players, model.Player{
 		Name: name,
 		Hash: hash,
 	})
 	g.State.Numbers = append(g.State.Numbers, NewNumberRow())
 	g.State.Done = append(g.State.Done, false)
-	return nil
+	return playerID, nil
 }
 
 // Return the index of the player whoose turn it is
