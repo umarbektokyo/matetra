@@ -25,14 +25,14 @@ func change_gui_scene(
 	seconds: float = 1.0
 	) -> void:
 		
-	Global.reset()
+	#Global.reset()
 		
 	if transition:
 		transition_controller.transition(transition_out, seconds) # Transition out
 		await transition_controller.animation_player.animation_finished
 	if current_gui_scene != null:
 		if delete:
-			if gui.get_child_count() >= 1:
+			if gui.get_child_count() >= 1: # Checks if there is even a scene to be deleted
 				current_gui_scene.queue_free() # Removes node entirely
 		elif keep_running:
 			current_gui_scene.visible = false # Keeps in memory and running
@@ -54,14 +54,14 @@ func change_3d_scene(
 	seconds: float = 1.0
 	) -> void:
 	
-	Global.reset()
+	#Global.reset()
 	
 	if transition:
 		transition_controller.transition(transition_out, seconds) # Transition out
 		await transition_controller.animation_player.animation_finished
 	if current_3d_scene != null:
 		if delete:
-			if world_3d.get_child_count() >= 1:
+			if world_3d.get_child_count() >= 1: # Checks if there is even a scene to be deleted
 				current_3d_scene.queue_free() # Removes node entirely
 		elif keep_running:
 			current_3d_scene.visible = false # Keeps in memory and running
@@ -83,13 +83,13 @@ func change_2d_scene(
 	seconds: float = 1.0
 	) -> void:
 		
-	Global.reset()
+	#Global.reset()
 		
 	if transition:
 		transition_controller.transition(transition_out, seconds) # Transition out
 		await transition_controller.animation_player.animation_finished
 	if delete:
-		if world_2d.get_child_count() >= 1:
+		if world_2d.get_child_count() >= 1: # Checks if there is even a scene to be deleted
 			current_2d_scene.queue_free() # Removes node entirely
 	elif keep_running:
 		current_2d_scene.visible = false # Keeps in memory and running

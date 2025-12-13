@@ -9,7 +9,6 @@ extends Control
 @export var splash_screen : VideoStreamPlayer
 @export var splash_screen_container: Node
 @onready var firstScene = "res://Scenes/first_scene.tscn"
-@onready var background = "res://Scenes/background.tscn"
 
 var splash_screens : Array
 
@@ -24,7 +23,7 @@ func fade() -> void:
 		tween.tween_interval(out_time)
 		await tween.finished
 	GlobalController.game_controller.change_2d_scene(firstScene)
-	GlobalController.game_controller.change_gui_scene(background, false)
+	GlobalController.game_controller.change_gui_scene("null")
 
 func _ready() -> void:
 	get_screens()
@@ -40,4 +39,4 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_pressed():
 		#get_tree().change_scene_to_packed(load_scene) #Used to cycle between splashcreens
 		GlobalController.game_controller.change_2d_scene(firstScene, true, false, true, "Fade In", "Fade Out", 0.1)
-		GlobalController.game_controller.change_gui_scene("null", true)
+		GlobalController.game_controller.change_gui_scene("null")

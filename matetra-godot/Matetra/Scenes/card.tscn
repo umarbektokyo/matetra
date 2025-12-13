@@ -1,0 +1,29 @@
+[gd_scene load_steps=6 format=3 uid="uid://b8e2byrx4tayu"]
+
+[ext_resource type="Texture2D" uid="uid://bqk6yn5s81hl3" path="res://Assets/Copy of Card v1.png" id="1_0qqmn"]
+[ext_resource type="Script" uid="uid://8xpqivi3pdaf" path="res://Scenes/card.gd" id="2_wf8id"]
+[ext_resource type="AudioStream" uid="uid://c260qshowdcrq" path="res://CardSFX/ui-sounds-pack-3-7-359721.mp3" id="3_brehn"]
+[ext_resource type="Script" uid="uid://cn8tfbwwc67l" path="res://Scenes/area_2d.gd" id="3_eumee"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gmcdd"]
+size = Vector2(650.0001, 1060.0002)
+
+[node name="Sprite2D" type="Sprite2D" groups=["cards"]]
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("1_0qqmn")
+script = ExtResource("2_wf8id")
+
+[node name="Area2D" type="Area2D" parent="."]
+z_index = 1
+script = ExtResource("3_eumee")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(0, 9.536741e-06)
+scale = Vector2(0.99999964, 0.99999964)
+shape = SubResource("RectangleShape2D_gmcdd")
+
+[node name="HoverSFX" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_brehn")
+
+[connection signal="area_entered" from="Area2D" to="Area2D" method="_on_area_entered"]
+[connection signal="area_exited" from="Area2D" to="Area2D" method="_on_area_exited"]
