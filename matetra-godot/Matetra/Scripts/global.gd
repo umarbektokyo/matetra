@@ -1,5 +1,11 @@
 extends Node
 
+var playerNumber1InSet = null
+var playerNumber2InSet = null
+var playerNumber3InSet = null
+var playerNumber4InSet = null
+var playerNumber5InSet = null
+
 var card_index = 5 # Example index in hand
 var inputs_req = "AnUn" # From CSV for "Addition"
 
@@ -17,6 +23,10 @@ var selected_user_player_id = 0     # Self
 var selected_user_slot = 1
 
 var current_cards_being_held: Array
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 func reset():
 	return
 
@@ -24,3 +34,7 @@ func check_cards_count():
 	if current_cards_being_held.size() > 1:
 		current_cards_being_held.front()._on_mouse_exited()
 		current_cards_being_held.erase(current_cards_being_held.front())
+<<<<<<< Updated upstream
+=======
+	
+>>>>>>> Stashed changes
