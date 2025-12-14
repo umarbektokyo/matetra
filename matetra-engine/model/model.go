@@ -30,7 +30,7 @@ type Player struct {
 }
 
 type Number struct {
-	Value *big.Int
+	Value *big.Float
 	Mark  string
 	// n: null
 	// F: fibonacci

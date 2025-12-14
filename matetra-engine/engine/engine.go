@@ -32,7 +32,7 @@ func New(gameID string) *Game {
 
 func NewNumber() model.Number {
 	return model.Number{
-		Value: big.NewInt(0),
+		Value: big.NewFloat(0),
 		Mark:  "n",
 	}
 }
@@ -177,7 +177,7 @@ func (g *Game) copyState() *model.GameState {
 			orig := g.State.Numbers[i][j]
 			virtual.Numbers[i][j] = model.Number{
 				Mark:  orig.Mark,
-				Value: new(big.Int).Set(orig.Value),
+				Value: new(big.Float).Set(orig.Value),
 			}
 		}
 	}

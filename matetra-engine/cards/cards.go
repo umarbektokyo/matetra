@@ -3,6 +3,7 @@ package cards
 import (
 	"encoding/csv"
 	"fmt"
+	"matetra/cards/constants"
 	"matetra/cards/functions"
 	"matetra/model"
 	"matetra/utils"
@@ -60,6 +61,8 @@ func CardFunction(vgs *model.GameState, cardIndex int) error {
 		return functions.MULTIPLY(vgs, card)
 	case "DIVIDE":
 		return functions.DIVIDE(vgs, card)
+	case "PI":
+		return constants.CONSTPI(vgs, card)
 	default:
 		return fmt.Errorf("unknown card method %s", card.Method)
 	}

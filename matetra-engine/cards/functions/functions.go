@@ -21,7 +21,7 @@ func ADD(vgs *model.GameState, card *model.Card) error {
 
 	a.Value.Add(a.Value, b.Value)
 
-	b.Value = big.NewInt(0)
+	b.Value = big.NewFloat(0)
 	b.Mark = "n"
 
 	return nil
@@ -41,7 +41,7 @@ func SUBTRACT(vgs *model.GameState, card *model.Card) error {
 
 	a.Value.Sub(a.Value, b.Value)
 
-	b.Value = big.NewInt(0)
+	b.Value = big.NewFloat(0)
 	b.Mark = "n"
 
 	return nil
@@ -61,7 +61,7 @@ func MULTIPLY(vgs *model.GameState, card *model.Card) error {
 
 	a.Value.Mul(a.Value, b.Value)
 
-	b.Value = big.NewInt(0)
+	b.Value = big.NewFloat(0)
 	b.Mark = "n"
 
 	return nil
@@ -79,13 +79,13 @@ func DIVIDE(vgs *model.GameState, card *model.Card) error {
 	a := &vgs.Numbers[attackerPlayer][attackerIndex]
 	b := &vgs.Numbers[userPlayer][userIndex]
 
-	if b.Value == big.NewInt(0) {
+	if b.Value.Cmp(big.NewFloat(0)) == 0 {
 		return fmt.Errorf("Cannot divide by zero")
 	}
 
-	a.Value.Div(a.Value, b.Value)
+	a.Value.Quo(a.Value, b.Value)
 
-	b.Value = big.NewInt(0)
+	b.Value = big.NewFloat(0)
 	b.Mark = "n"
 
 	return nil

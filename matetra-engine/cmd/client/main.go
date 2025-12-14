@@ -230,7 +230,8 @@ func displayGameState(gs model.GameState) {
 		if i < len(gs.Numbers) {
 			for j, num := range gs.Numbers[i] {
 				// Format: [Index:ValueMark]
-				numberStrings[j] = fmt.Sprintf("[%d:%s%s]", j, num.Value.String(), num.Mark)
+				displayValue := num.Value.Text('g', 10)
+				numberStrings[j] = fmt.Sprintf("[%d:%s%s]", j, displayValue, num.Mark)
 			}
 		}
 
