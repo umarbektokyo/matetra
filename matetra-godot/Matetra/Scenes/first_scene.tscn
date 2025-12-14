@@ -5,16 +5,16 @@
 [node name="FirstScene" type="Node2D"]
 
 [node name="Sprite2D" parent="." instance=ExtResource("1_fhmhh")]
-position = Vector2(379.9, 520)
+position = Vector2(353.9, 673.3)
 
 [node name="Sprite2D2" parent="." instance=ExtResource("1_fhmhh")]
-position = Vector2(439.9, 520)
+position = Vector2(452.9, 671.3)
 
 [node name="Sprite2D3" parent="." instance=ExtResource("1_fhmhh")]
-position = Vector2(522.89996, 520)
+position = Vector2(551.9, 671.3)
 
 [node name="Sprite2D4" parent="." instance=ExtResource("1_fhmhh")]
-position = Vector2(597.89996, 520)
+position = Vector2(642.9, 672.3)
 
 [node name="Sprite2D5" parent="." instance=ExtResource("1_fhmhh")]
-position = Vector2(675.89996, 520)
+position = Vector2(755.9, 674.3)
