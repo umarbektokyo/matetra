@@ -1,5 +1,4 @@
 extends Node
-<<<<<<< Updated upstream:matetra-godot/Matetra/Scripts/card_api.gd
 
 # Reference to the NetworkManager
 @onready var network = $"/root/MatetraAPI" 
@@ -66,7 +65,6 @@ func get_requirements_list(req_string: String) -> Array:
 	for chr in req_string:
 		requirements.append(INPUT_DESCRIPTIONS.get(chr, "Unknown Input"))
 	return requirements
-=======
 #
 ## Reference to the AutoLoad we created in the previous step.
 ## Make sure the name matches what you put in Project Settings > Globals
@@ -121,4 +119,3 @@ func get_requirements_list(req_string: String) -> Array:
 	#for char in req_string:
 		#requirements.append(INPUT_DESCRIPTIONS.get(char, "Unknown Input"))
 	#return requirements
->>>>>>> Stashed changes:matetra-godot/Matetra/card_api.gd

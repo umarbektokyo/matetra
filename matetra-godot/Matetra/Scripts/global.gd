@@ -23,10 +23,7 @@ var selected_user_player_id = 0     # Self
 var selected_user_slot = 1
 
 var current_cards_being_held: Array
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
 func reset():
 	return
 
@@ -34,7 +31,3 @@ func check_cards_count():
 	if current_cards_being_held.size() > 1:
 		current_cards_being_held.front()._on_mouse_exited()
 		current_cards_being_held.erase(current_cards_being_held.front())
-<<<<<<< Updated upstream
-=======
-	
->>>>>>> Stashed changes

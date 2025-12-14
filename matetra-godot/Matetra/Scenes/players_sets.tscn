@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://blk6irnh6muyr"]
 
-[ext_resource type="Script" uid="uid://bieaaiqbdfiuh" path="res://Assets/players_sets.gd" id="1_h5y2l"]
+[ext_resource type="Script" uid="uid://bieaaiqbdfiuh" path="res://Scripts/players_sets.gd" id="1_spf80"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wsubp"]
 content_margin_left = 0.0
@@ -25,7 +25,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_h5y2l")
+script = ExtResource("1_spf80")
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
 layout_mode = 1

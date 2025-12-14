@@ -1,11 +1,5 @@
 extends Node
 
-<<<<<<< Updated upstream
-# Signal to notify other parts of the game when state updates
-signal game_state_received(state_data)
-# signal connection_established()
-signal connection_closed()
-=======
 # --- SIGNALS ---
 # Emitted when the board updates (Numbers, Cards, Players)
 signal game_state_received(game_state) 
@@ -13,7 +7,6 @@ signal game_state_received(game_state)
 signal move_reply_received(success, message)
 # Emitted on connection loss
 signal disconnected()
->>>>>>> Stashed changes
 
 # --- CONFIGURATION ---
 var socket = WebSocketPeer.new()
