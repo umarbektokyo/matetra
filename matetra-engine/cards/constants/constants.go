@@ -6,6 +6,10 @@ import (
 )
 
 func CONSTPI(vgs *model.GameState, card *model.Card) error {
+	if err := utils.ValidateInputs(vgs, card); err != nil {
+		return err
+	}
+
 	utils.ValidateInputs(vgs, card)
 
 	userPlayer := card.Inputs[0]
