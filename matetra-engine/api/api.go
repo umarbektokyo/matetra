@@ -131,6 +131,8 @@ func (a *API) handleIncomingMessages(pc *PlayerConnection, msg Message) {
 		a.BroadcastState()
 	case "PLAY_CARD":
 		a.handlePlayCard(pc, msg.Payload)
+	case "NEXT_TURN":
+		a.handleNextTurn(pc)
 	default:
 		a.sendError(pc, "unknown message type: "+msg.Type)
 	}
@@ -255,4 +257,25 @@ func (a *API) sendError(pc *PlayerConnection, errMsg string) {
 		log.Printf("error sending error: %v", err)
 	}
 	pc.mu.Unlock()
+}
+
+func (a *API) handleNextTurn(pc *PlayerConnection) {
+	if pc.PlayerID == -1 {
+		a.sendCustomReply(pc, false, "player is not authenticated", nil)
+		return
+	}
+
+	resultState, err := a.Game.ProcessNextTurn(pc.PlayerID)
+	if err != nil {
+		a.sendCustomReply(pc, false, fmt.Sprintf("failed to end the turn: %v", err), nil)
+		return
+	}
+
+	message := "turn ended successfully"
+	if resultState.Turn != a.Game.State.Turn {
+		message = fmt.Sprintf("turn finished! turn: %d", resultState.Turn)
+	} else {
+		message = fmt.Sprintf("player @%s ended their turn.", resultState.Players[pc.PlayerID].Name)
+	}
+	a.BroadcastReply(true, message, resultState)
 }
