@@ -21,7 +21,7 @@ config/icon="res://icon.svg"
 Global="*res://Scripts/global.gd"
 GlobalController="*res://Scripts/global_controller.gd"
 MatetraAPI="*res://matetra_godot_api.gd"
-CardAPI="*res://card_api.gd"
+CardAPI="*res://Scripts/card_api.gd"
 
 [input]
 

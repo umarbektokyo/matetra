@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=3 uid="uid://b8e2byrx4tayu"]
+[gd_scene load_steps=7 format=3 uid="uid://b8e2byrx4tayu"]
 
 [ext_resource type="Texture2D" uid="uid://bqk6yn5s81hl3" path="res://Assets/Copy of Card v1.png" id="1_0qqmn"]
-[ext_resource type="Script" uid="uid://8xpqivi3pdaf" path="res://Scenes/card.gd" id="2_wf8id"]
+[ext_resource type="PackedScene" uid="uid://6imix0qhjfp3" path="res://Scenes/card_generator.tscn" id="2_eumee"]
+[ext_resource type="Script" uid="uid://8xpqivi3pdaf" path="res://Scripts/card.gd" id="2_wf8id"]
 [ext_resource type="AudioStream" uid="uid://c260qshowdcrq" path="res://CardSFX/ui-sounds-pack-3-7-359721.mp3" id="3_brehn"]
-[ext_resource type="Script" uid="uid://cn8tfbwwc67l" path="res://Scenes/area_2d.gd" id="3_eumee"]
+[ext_resource type="Script" uid="uid://cn8tfbwwc67l" path="res://Scripts/area_2d.gd" id="3_eumee"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_gmcdd"]
 size = Vector2(650.0001, 1060.0002)
@@ -12,6 +13,9 @@ size = Vector2(650.0001, 1060.0002)
 scale = Vector2(0.2, 0.2)
 texture = ExtResource("1_0qqmn")
 script = ExtResource("2_wf8id")
+
+[node name="Card_generator" parent="." instance=ExtResource("2_eumee")]
+scale = Vector2(0.99999994, 0.99999994)
 
 [node name="Area2D" type="Area2D" parent="."]
 z_index = 1

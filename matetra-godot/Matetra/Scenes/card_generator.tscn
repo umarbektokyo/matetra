@@ -7,7 +7,7 @@
 [node name="Card_generator" type="Node2D"]
 script = ExtResource("1_fk6l7")
 
-[node name="CardPNG" type="Sprite2D" parent="."]
+[node name="CopyOfCardV1(2)" type="Sprite2D" parent="."]
 texture = ExtResource("2_x47u2")
 
 [node name="Title" type="RichTextLabel" parent="."]
@@ -35,6 +35,3 @@ theme_override_fonts/normal_font = ExtResource("3_x47u2")
 theme_override_font_sizes/normal_font_size = 30
 text = "Information (176)"
 horizontal_alignment = 1
-
-[node name="Camera2D" type="Camera2D" parent="."]
-zoom = Vector2(0.5, 0.5)
