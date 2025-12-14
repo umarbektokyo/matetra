@@ -46,7 +46,6 @@ func main() {
 
 	fmt.Printf("Attempting to connect to server at %s...\n", serverAddr)
 
-	// connect to the websocket server
 	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
 		log.Fatalf("error: could not connect to server at %s. Is the server still running? %v", u.String(), err)
@@ -54,15 +53,21 @@ func main() {
 	defer c.Close()
 	fmt.Println("Connection successful.")
 
-	// register the player
+	// register the player and BLOCK until initial state is received and displayed
 	if err := registerPlayer(c); err != nil {
 		log.Fatalf("Registration failed: %v", err)
 	}
 
-	// Use goroutines for simultaneous listening and commanding
+	// start listening for server updates (now running asynchronously)
 	go listenForUpdates(c)
+
+	// Start the command interface
 	commandLoop(c)
 }
+
+// ----------------------------------------------------------------------
+// REGISTRATION AND INITIAL STATE SETUP
+// ----------------------------------------------------------------------
 
 func registerPlayer(c *websocket.Conn) error {
 	reader := bufio.NewReader(os.Stdin)
@@ -83,7 +88,9 @@ func registerPlayer(c *websocket.Conn) error {
 
 	passwordHash := utils.Hash(password)
 	fmt.Printf("Hashed password (SHA256): %s...\n", passwordHash[:8])
+	PlayerName = username // Set player name globally
 
+	// construct the ADD_PLAYER message
 	payload := api.PlayerPayload{
 		Name: username,
 		Hash: passwordHash,
@@ -98,33 +105,81 @@ func registerPlayer(c *websocket.Conn) error {
 		return fmt.Errorf("error sending registration request: %v", err)
 	}
 
-	// wait for server's response
-	var response api.Message
-	if err := c.ReadJSON(&response); err != nil {
-		return fmt.Errorf("error reading registration response: %v", err)
-	}
-
-	switch response.Type {
-	case "PLAYER_ADDED":
-		// Find the PlayerID from the received state update
-		// NOTE: The server should really return the PlayerID in the PLAYER_ADDED payload for simplicity.
-		// For now, we rely on the first STATE_UPDATE to follow.
-
-		PlayerName = username
-		// We can't safely set PlayerID here, rely on STATE_UPDATE after the loop starts.
-		fmt.Printf("Success: player @%s has been added to the game!\n", PlayerName)
-		return nil
-	case "ERROR":
-		errorPayloadBytes, err := json.Marshal(response.Payload)
-		if err != nil {
-			return fmt.Errorf("registration failed: unknown error format")
+	// 1. Wait for server's "PLAYER_ADDED" response
+	// FIX: Loop to handle unsolicited messages (like broadcasts) that might arrive before PLAYER_ADDED
+	for {
+		var response api.Message
+		if err := c.ReadJSON(&response); err != nil {
+			return fmt.Errorf("error reading registration response: %v", err)
 		}
-		var errorData map[string]string
-		json.Unmarshal(errorPayloadBytes, &errorData)
-		return fmt.Errorf("registration failed: %s", errorData["message"])
-	default:
-		return fmt.Errorf("unexpected server response type: %s", response.Type)
+
+		if response.Type == "PLAYER_ADDED" {
+			fmt.Printf("Success: player @%s has been added to the game!\n", username)
+			break
+		} else if response.Type == "ERROR" {
+			errorPayloadBytes, err := json.Marshal(response.Payload)
+			if err != nil {
+				return fmt.Errorf("registration failed: unknown error format")
+			}
+			var errorData map[string]string
+			json.Unmarshal(errorPayloadBytes, &errorData)
+			return fmt.Errorf("registration failed: %s", errorData["message"])
+		} else {
+			// Ignore other messages (e.g. broadcasts for other players joining)
+			// expected behavior in a simplified client
+			continue
+		}
 	}
+
+	// 2. CRITICAL FIX: BLOCKING WAIT FOR INITIAL STATE_UPDATE
+	// The server sends the STATE_UPDATE immediately after "PLAYER_ADDED".
+	var stateUpdateMsg api.Message
+	if err := c.ReadJSON(&stateUpdateMsg); err != nil {
+		return fmt.Errorf("error reading initial state update: %v", err)
+	}
+
+	var gameState model.GameState
+
+	// Server sends STATE_UPDATE (old way) or PLAY_CARD_REPLY (new way, contains state)
+	if stateUpdateMsg.Type == "PLAY_CARD_REPLY" {
+		var reply api.CardPlayReply
+		payloadBytes, _ := json.Marshal(stateUpdateMsg.Payload)
+		if err := json.Unmarshal(payloadBytes, &reply); err == nil && reply.NewGameState != nil {
+			gameState = *reply.NewGameState
+		}
+	} else if stateUpdateMsg.Type == "STATE_UPDATE" {
+		statePayloadBytes, err := json.Marshal(stateUpdateMsg.Payload)
+		if err != nil {
+			return fmt.Errorf("error marshalling initial state payload: %v", err)
+		}
+		if err := json.Unmarshal(statePayloadBytes, &gameState); err != nil {
+			return fmt.Errorf("error unmarshalling initial GameState: %v", err)
+		}
+	} else {
+		return fmt.Errorf("unexpected message type after PLAYER_ADDED: %s", stateUpdateMsg.Type)
+	}
+
+	if gameState.GameID == "" {
+		return fmt.Errorf("failed to retrieve valid initial game state")
+	}
+
+	CurrentGameState = gameState
+
+	// Find PlayerID from the received state
+	for i, p := range gameState.Players {
+		if p.Name == username {
+			PlayerID = i
+			break
+		}
+	}
+	if PlayerID == -1 {
+		return fmt.Errorf("could not find registered player ID in initial state")
+	}
+
+	// Display the initial state before starting the command loop
+	displayGameState(CurrentGameState)
+
+	return nil
 }
 
 // ----------------------------------------------------------------------
@@ -134,7 +189,7 @@ func registerPlayer(c *websocket.Conn) error {
 func displayGameState(gs model.GameState) {
 	fmt.Print("\033[H\033[2J") // Clear terminal screen
 
-	// Set PlayerID globally if not yet set
+	// Ensure PlayerID is set (should be from registerPlayer, but safe check)
 	if PlayerID == -1 {
 		for i, p := range gs.Players {
 			if p.Name == PlayerName {
@@ -144,8 +199,16 @@ func displayGameState(gs model.GameState) {
 		}
 	}
 
+	if len(gs.Players) == 0 || gs.Turn == -1 {
+		fmt.Println("Waiting for game to start...")
+		return
+	}
+
+	// Determine current player index safely
+	currentPlayerIndex := gs.Turn % len(gs.Players)
+
 	fmt.Println("=====================================================================")
-	fmt.Printf(" 🎮 GAME: %s | TURN: %d | CURRENT PLAYER: @%s\n", gs.GameID, gs.Turn, gs.Players[gs.Turn%len(gs.Players)].Name)
+	fmt.Printf(" 🎮 GAME: %s | TURN: %d | CURRENT PLAYER: @%s\n", gs.GameID, gs.Turn, gs.Players[currentPlayerIndex].Name)
 	fmt.Println("=====================================================================")
 
 	// 1. Display Player Numbers
@@ -158,17 +221,20 @@ func displayGameState(gs model.GameState) {
 
 		marker := "  "
 		if i == PlayerID {
-			marker = ">>"
-		} else if i == (gs.Turn % len(gs.Players)) {
-			marker = "🎯"
+			marker = ">>" // Me
+		} else if i == currentPlayerIndex {
+			marker = "🎯" // Turn player
 		}
 
 		numberStrings := make([]string, 5)
-		for j, num := range gs.Numbers[i] {
-			numberStrings[j] = fmt.Sprintf("[%d:%s%s]", j, num.Value, num.Mark)
+		if i < len(gs.Numbers) {
+			for j, num := range gs.Numbers[i] {
+				// Format: [Index:ValueMark]
+				numberStrings[j] = fmt.Sprintf("[%d:%s%s]", j, num.Value.String(), num.Mark)
+			}
 		}
 
-		fmt.Printf("%s %s (@%s) [%s]: %s\n", marker, doneStatus, p.Name, strings.Join(numberStrings, " | "), p.Hash[:8])
+		fmt.Printf("%s %s @%s: %s\n", marker, doneStatus, p.Name, strings.Join(numberStrings, " | "))
 	}
 
 	// 2. Display Player Hand
@@ -178,10 +244,7 @@ func displayGameState(gs model.GameState) {
 		if card.Owner == PlayerID {
 			handCount++
 			// Find the required input string from the card
-			inputsReq := ""
-			if i < len(gs.Cards) {
-				inputsReq = gs.Cards[i].InputsReq
-			}
+			inputsReq := card.InputsReq
 			fmt.Printf("  [C:%d] %s (Req: %s) -> %s\n", i, card.Name, inputsReq, card.Description)
 		}
 	}
@@ -190,7 +253,7 @@ func displayGameState(gs model.GameState) {
 	}
 
 	// 3. Display Queue
-	fmt.Println("\n--- MOVE QUEUE ---")
+	fmt.Println("\n--- MOVE QUEUE (Pending Moves) ---")
 	if len(gs.Queue) > 0 {
 		queueDetails := make([]string, len(gs.Queue))
 		for i, cardIndex := range gs.Queue {
@@ -199,7 +262,12 @@ func displayGameState(gs model.GameState) {
 			if cardIndex >= 0 && cardIndex < len(gs.Cards) {
 				cardName = gs.Cards[cardIndex].Name
 			}
-			queueDetails[i] = fmt.Sprintf("%s (ID:%d)", cardName, cardIndex)
+			// Display the card and the inputs (if available, they should be in the state)
+			var inputs string
+			if cardIndex < len(gs.Cards) && len(gs.Cards[cardIndex].Inputs) > 0 {
+				inputs = fmt.Sprintf("(Inputs: %v)", gs.Cards[cardIndex].Inputs)
+			}
+			queueDetails[i] = fmt.Sprintf("%s %s", cardName, inputs)
 		}
 		fmt.Printf("  %s\n", strings.Join(queueDetails, " -> "))
 	} else {
@@ -207,10 +275,17 @@ func displayGameState(gs model.GameState) {
 	}
 
 	fmt.Println("---------------------------------------------------------------------")
+	fmt.Println("\n💡 COMMANDS:")
+	fmt.Println("  apply(cardIndex, input1, input2, ..., permanent)")
+	fmt.Println("    Example: apply(2, 0, 0, 5, 1)  - Play card C:2 with inputs [0,0,5], permanent")
+	fmt.Println("  turnend()  - End your turn")
+	fmt.Println("  state      - Redraw the game board")
+	fmt.Println("  help       - Show detailed help")
+	fmt.Println("  exit/quit  - Close the client")
 }
 
 // ----------------------------------------------------------------------
-// MESSAGE LISTENER
+// MESSAGE LISTENER (Async)
 // ----------------------------------------------------------------------
 
 func listenForUpdates(c *websocket.Conn) {
@@ -225,9 +300,9 @@ func listenForUpdates(c *websocket.Conn) {
 			continue
 		}
 
+		// Handle all state updates and replies
 		switch msg.Type {
 		case "PLAY_CARD_REPLY":
-			// Both the success/fail confirmation and the permanent broadcast use this.
 			var reply api.CardPlayReply
 			payloadBytes, _ := json.Marshal(msg.Payload)
 			if err := json.Unmarshal(payloadBytes, &reply); err != nil {
@@ -235,7 +310,7 @@ func listenForUpdates(c *websocket.Conn) {
 				continue
 			}
 
-			// 1. Update Global State
+			// 1. Update Global State and Redisplay
 			if reply.NewGameState != nil {
 				CurrentGameState = *reply.NewGameState
 				displayGameState(CurrentGameState)
@@ -253,15 +328,29 @@ func listenForUpdates(c *websocket.Conn) {
 			var errorData map[string]string
 			json.Unmarshal(errorPayloadBytes, &errorData)
 			fmt.Printf("\n[SERVER ERROR]: %s\n", errorData["message"])
+		case "STATE_UPDATE":
+			// FIX: Handle global state updates (e.g. when other players join or turn changes)
+			statePayloadBytes, err := json.Marshal(msg.Payload)
+			if err != nil {
+				log.Printf("Error marshalling state payload: %v", err)
+				continue
+			}
+			var newMessageState model.GameState
+			if err := json.Unmarshal(statePayloadBytes, &newMessageState); err != nil {
+				log.Printf("Error unmarshalling GameState: %v", err)
+				continue
+			}
+			CurrentGameState = newMessageState
+			displayGameState(CurrentGameState)
+
 		default:
-			// Ignore unhandled types like "PLAYER_ADDED" since we handle it in registerPlayer
-			// and rely on subsequent PLAY_CARD_REPLY or STATE_UPDATE for state changes.
+			// Ignore unhandled types like "PLAYER_ADDED"
 		}
 	}
 }
 
 // ----------------------------------------------------------------------
-// COMMAND INTERFACE
+// COMMAND INTERFACE (Blocking)
 // ----------------------------------------------------------------------
 
 func commandLoop(c *websocket.Conn) {
@@ -272,6 +361,8 @@ func commandLoop(c *websocket.Conn) {
 		input, _ := reader.ReadString('\n')
 		input = strings.TrimSpace(input)
 
+		// Simple parsing: separate command from arguments inside parentheses
+		// e.g., apply(2, 0, 1, 1) -> ["apply", "2", "0", "1", "1"]
 		parts := strings.FieldsFunc(input, func(r rune) bool {
 			return r == '(' || r == ')' || r == ',' || r == ' '
 		})
@@ -284,8 +375,10 @@ func commandLoop(c *websocket.Conn) {
 
 		switch command {
 		case "apply":
+			// Usage: apply(cardIndex, input1, input2, ..., permanent)
+			// Example: apply(2, 0, 1, 1)
 			if len(parts) < 3 {
-				fmt.Println("Usage: apply(cardIndex, input1, input2, ..., permanent)")
+				fmt.Println("Usage: apply(cardIndex, input1, ..., permanent)")
 				fmt.Println("Permanent: 1 for yes, 0 for preview. Example: apply(2, 0, 1, 1)")
 				continue
 			}
@@ -293,7 +386,7 @@ func commandLoop(c *websocket.Conn) {
 			// Parse card index
 			cardIndex, err := strconv.Atoi(parts[1])
 			if err != nil {
-				fmt.Println("Invalid card index.")
+				fmt.Println("Invalid card index (must be integer).")
 				continue
 			}
 
@@ -302,7 +395,7 @@ func commandLoop(c *websocket.Conn) {
 			for i := 2; i < len(parts)-1; i++ {
 				inputVal, err := strconv.Atoi(parts[i])
 				if err != nil {
-					fmt.Printf("Invalid input value at position %d.\n", i-1)
+					fmt.Printf("Invalid input value '%s' at position %d.\n", parts[i], i-1)
 					inputs = nil
 					break
 				}
@@ -336,8 +429,18 @@ func commandLoop(c *websocket.Conn) {
 			} else {
 				fmt.Println("Waiting for initial game state...")
 			}
+		case "help":
+			fmt.Println("\nAvailable Commands:")
+			fmt.Println("  apply(C, I1, I2, ..., P): Play a card.")
+			fmt.Println("    C: Card index (from YOUR HAND).")
+			fmt.Println("    I: Inputs (player/number index, dice roll, etc.).")
+			fmt.Println("    P: Permanent flag (1 to queue the move, 0 for preview).")
+			fmt.Println("  turnend(): Finish your turn.")
+			fmt.Println("  state: Redraw the game board.")
+			fmt.Println("  exit/quit: Close the client.")
+
 		default:
-			fmt.Printf("Unknown command: %s. Use apply(), turnend(), or exit().\n", command)
+			fmt.Printf("Unknown command: %s. Type 'help' for available commands.\n", command)
 		}
 	}
 }
@@ -365,9 +468,9 @@ func sendPlayCard(c *websocket.Conn, cardIndex int, inputs []int, permanent bool
 		log.Printf("Error sending PLAY_CARD: %v", err)
 	}
 	if !permanent {
-		fmt.Println("Sent preview request...")
+		fmt.Println("Sent preview request. Waiting for reply...")
 	} else {
-		fmt.Println("Sent permanent move...")
+		fmt.Println("Sent permanent move. Waiting for board update...")
 	}
 }
 
@@ -377,13 +480,14 @@ func sendTurnEnd(c *websocket.Conn) {
 		return
 	}
 
+	// Note: We assume the server's API has been updated to handle PROCESS_NEXT_TURN
 	turnEndMsg := api.Message{
-		Type:    "NEXT_TURN", // You need to update the server to accept this type!
+		Type:    "PROCESS_NEXT_TURN",
 		Payload: nil,
 	}
 
 	if err := c.WriteJSON(turnEndMsg); err != nil {
 		log.Printf("Error sending PROCESS_NEXT_TURN: %v", err)
 	}
-	fmt.Println("Sent turn end request...")
+	fmt.Println("Sent turn end request. Waiting for update...")
 }

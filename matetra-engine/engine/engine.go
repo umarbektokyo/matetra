@@ -25,7 +25,7 @@ func New(gameID string) *Game {
 			Numbers: make([][5]model.Number, 0),
 			Done:    make([]bool, 0),
 			Queue:   make([]int, 0),
-			Turn:    -1,
+			Turn:    0,
 		},
 	}
 }
@@ -108,11 +108,8 @@ func (g *Game) PlayerHandCount(player int) int {
 	return count
 }
 
-// Fills everyone's hands up (6 cards max) (needs optimisation)
-func (g *Game) RestockCards() {
-	g.mu.Lock()
-	defer g.mu.Unlock()
-
+// Internal version (no lock)
+func (g *Game) restockCards() {
 	for p := range g.State.Players {
 		handCount := 0
 		for _, card := range g.State.Cards {
@@ -156,11 +153,15 @@ func (g *Game) RestockCards() {
 	}
 }
 
-// Makes a virtual deep copy of the game state
-func (g *Game) CopyState() *model.GameState {
-	g.mu.RLock()
-	defer g.mu.RUnlock()
+// Fills everyone's hands up (6 cards max) (needs optimisation)
+func (g *Game) RestockCards() {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	g.restockCards()
+}
 
+// Internal version (no lock)
+func (g *Game) copyState() *model.GameState {
 	virtual := &model.GameState{
 		GameID:  g.State.GameID,
 		Players: append([]model.Player(nil), g.State.Players...),
@@ -182,6 +183,13 @@ func (g *Game) CopyState() *model.GameState {
 	}
 
 	return virtual
+}
+
+// Makes a virtual deep copy of the game state
+func (g *Game) CopyState() *model.GameState {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+	return g.copyState()
 }
 
 // Applies a singular card
@@ -211,19 +219,28 @@ func (g *Game) ApplyCards(vgs *model.GameState) error {
 	return nil
 }
 
-// Ends a player's turn
-func (g *Game) NextTurn() error {
-	virtual := g.CopyState()
-	if err := g.ApplyCards(virtual); err != nil {
-		return err
-	}
+// Internal version (no lock)
+func (g *Game) nextTurn() error {
+	virtual := g.copyState()
+
+	// FIX: Moves are now applied immediately during the turn.
+	// We just need to clear the queue (which served as history/display for the turn).
+	virtual.Queue = nil
+
 	g.State = virtual
-	g.RestockCards()
+	g.restockCards()
 	g.State.Turn++
 	for i := range g.State.Done {
 		g.State.Done[i] = false
 	}
 	return nil
+}
+
+// Ends a player's turn
+func (g *Game) NextTurn() error {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	return g.nextTurn()
 }
 
 // Checks if the player is moving their own card
@@ -244,18 +261,21 @@ func (g *Game) ProcessMove(playerID int, cardIndex int, inputs []int, permanent 
 
 	// check ownership
 	if !g.PlayerCanPlayCard(playerID, cardIndex) {
+		g.mu.RUnlock() // manual unlock before return, since RLock is at top
 		return nil, fmt.Errorf("you do not own this card")
 	}
 
 	// validate input
 	expected := len(g.State.Cards[cardIndex].InputsReq)
 	if len(inputs) != expected {
+		g.mu.RUnlock()
 		return nil, fmt.Errorf("expected %d inputs but got %d", expected, len(inputs))
 	}
 
 	g.mu.RUnlock()
 
 	if !permanent {
+		// Use public CopyState (RLock) is fine here because we released RLock above
 		virtual := g.CopyState()
 
 		vCard := &virtual.Cards[cardIndex]
@@ -275,6 +295,13 @@ func (g *Game) ProcessMove(playerID int, cardIndex int, inputs []int, permanent 
 		}
 
 		g.State.Cards[cardIndex].Inputs = append([]int(nil), inputs...)
+
+		// FIX: Apply the move immediately to the global state
+		if err := g.ApplyCard(g.State, cardIndex); err != nil {
+			return nil, fmt.Errorf("move failed: %v", err)
+		}
+
+		// Keep adding to queue for UI display of "moves made this turn"
 		g.State.Queue = append(g.State.Queue, cardIndex)
 
 		return g.State, nil
@@ -301,7 +328,7 @@ func (g *Game) ProcessNextTurn(playerID int) (*model.GameState, error) {
 	}
 
 	if finished {
-		if err := g.NextTurn(); err != nil {
+		if err := g.nextTurn(); err != nil { // Use internal non-locking version
 			return nil, err
 		}
 	}

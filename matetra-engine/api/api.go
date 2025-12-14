@@ -131,7 +131,7 @@ func (a *API) handleIncomingMessages(pc *PlayerConnection, msg Message) {
 		a.BroadcastState()
 	case "PLAY_CARD":
 		a.handlePlayCard(pc, msg.Payload)
-	case "NEXT_TURN":
+	case "PROCESS_NEXT_TURN":
 		a.handleNextTurn(pc)
 	default:
 		a.sendError(pc, "unknown message type: "+msg.Type)
@@ -271,11 +271,9 @@ func (a *API) handleNextTurn(pc *PlayerConnection) {
 		return
 	}
 
-	message := "turn ended successfully"
+	message := fmt.Sprintf("player @%s has ended their turn.", resultState.Players[pc.PlayerID].Name)
 	if resultState.Turn != a.Game.State.Turn {
-		message = fmt.Sprintf("turn finished! turn: %d", resultState.Turn)
-	} else {
-		message = fmt.Sprintf("player @%s ended their turn.", resultState.Players[pc.PlayerID].Name)
+		message = fmt.Sprintf("turn finished! started turn %d. current player is @%s", resultState.Turn, resultState.Players[resultState.Turn%len(resultState.Players)].Name)
 	}
 	a.BroadcastReply(true, message, resultState)
 }
