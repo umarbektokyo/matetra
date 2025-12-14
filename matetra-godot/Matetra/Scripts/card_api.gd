@@ -65,3 +65,57 @@ func get_requirements_list(req_string: String) -> Array:
 	for chr in req_string:
 		requirements.append(INPUT_DESCRIPTIONS.get(chr, "Unknown Input"))
 	return requirements
+#
+## Reference to the AutoLoad we created in the previous step.
+## Make sure the name matches what you put in Project Settings > Globals
+## (I recommended naming it "Network" or "MatetraNetwork")
+#
+#const INPUT_DESCRIPTIONS = {
+	#"d": "Roll Dice (1-6)",
+	#"p": "Select Player Index",
+	#"n": "Select Number Slot (0-4)",
+	#"A": "Select Attacker (Player ID)",
+	#"U": "Select User (Player ID)",
+	#"c": "Select Card ID" 
+#}
+#
+## --- MAIN FUNCTION ---
+#func execute_card_action(permanent: bool, card_index: int, req_string: String, user_selections: Array):
+	#
+	#var formatted_inputs: Array[int] = []
+	#
+	## 1. Validation
+	#if user_selections.size() != req_string.length():
+		#push_error("Mismatch: Card expects %d inputs, got %d" % [req_string.length(), user_selections.size()])
+		#return
+#
+	## 2. Format Data (Convert UI selections to Go Integers)
+	#for i in range(req_string.length()):
+		#var req_char = req_string[i]
+		#var raw_val = user_selections[i]
+		#
+		#match req_char:
+			#"d": 
+				#formatted_inputs.append(int(raw_val))
+			#"p", "A", "U":
+				#formatted_inputs.append(int(raw_val))
+			#"n":
+				#formatted_inputs.append(int(raw_val))
+			#_:
+				#formatted_inputs.append(int(raw_val))
+#
+	## 3. Send to Network Manager
+	## We do NOT build the JSON here. We pass the raw data to the MatetraAPI script.
+	## This ensures the keys (card_index, inputs, permanent) match api.go exactly.
+	#
+	#print("Sending Move (Permanent: %s): %s" % [permanent, formatted_inputs])
+	#
+	## Calls the function inside MatetraNetwork.gd
+	#MatetraAPI.play_card(card_index, formatted_inputs, permanent)
+#
+## --- HELPER ---
+#func get_requirements_list(req_string: String) -> Array:
+	#var requirements = []
+	#for char in req_string:
+		#requirements.append(INPUT_DESCRIPTIONS.get(char, "Unknown Input"))
+	#return requirements

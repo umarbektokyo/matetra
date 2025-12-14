@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://7btcx0anv7jw"]
+
+[ext_resource type="Script" uid="uid://cejdf16h4y7qn" path="res://Scripts/matetra_engine_test.gd" id="1_es51o"]
+
+[node name="matetra-engine-test" type="Node2D"]
+script = ExtResource("1_es51o")

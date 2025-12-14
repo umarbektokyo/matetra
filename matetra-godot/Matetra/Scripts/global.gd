@@ -1,5 +1,11 @@
 extends Node
 
+var playerNumber1InSet = null
+var playerNumber2InSet = null
+var playerNumber3InSet = null
+var playerNumber4InSet = null
+var playerNumber5InSet = null
+
 var card_index = 5 # Example index in hand
 var inputs_req = "AnUn" # From CSV for "Addition"
 
@@ -17,6 +23,7 @@ var selected_user_player_id = 0     # Self
 var selected_user_slot = 1
 
 var current_cards_being_held: Array
+
 func reset():
 	return
 
