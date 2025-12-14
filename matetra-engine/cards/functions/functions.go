@@ -9,7 +9,9 @@ import (
 
 // Input: AnUn
 func ADD(vgs *model.GameState, card *model.Card) error {
-	utils.ValidateInputs(vgs, card)
+	if err := utils.ValidateInputs(vgs, card); err != nil {
+		return err
+	}
 
 	attackerPlayer := card.Inputs[0]
 	attackerIndex := card.Inputs[1]
@@ -29,7 +31,9 @@ func ADD(vgs *model.GameState, card *model.Card) error {
 
 // Input: AnUn
 func SUBTRACT(vgs *model.GameState, card *model.Card) error {
-	utils.ValidateInputs(vgs, card)
+	if err := utils.ValidateInputs(vgs, card); err != nil {
+		return err
+	}
 
 	attackerPlayer := card.Inputs[0]
 	attackerIndex := card.Inputs[1]
@@ -49,7 +53,9 @@ func SUBTRACT(vgs *model.GameState, card *model.Card) error {
 
 // Input: AnUn
 func MULTIPLY(vgs *model.GameState, card *model.Card) error {
-	utils.ValidateInputs(vgs, card)
+	if err := utils.ValidateInputs(vgs, card); err != nil {
+		return err
+	}
 
 	attackerPlayer := card.Inputs[0]
 	attackerIndex := card.Inputs[1]
@@ -69,7 +75,9 @@ func MULTIPLY(vgs *model.GameState, card *model.Card) error {
 
 // Input: AnUn
 func DIVIDE(vgs *model.GameState, card *model.Card) error {
-	utils.ValidateInputs(vgs, card)
+	if err := utils.ValidateInputs(vgs, card); err != nil {
+		return err
+	}
 
 	attackerPlayer := card.Inputs[0]
 	attackerIndex := card.Inputs[1]
