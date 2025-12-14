@@ -8,4 +8,5 @@ extends Control
 func _process(delta):
 	if Input.is_action_pressed("operation"):
 		# Send to API
-		CardAPI.execute_card_action(Global.card_index, Global.inputs_req, Global.ui_selection_data)
+		CardAPI.execute_card_action(true, Global.card_index, Global.inputs_req, Global.ui_selection_data)
+		
