@@ -45,9 +45,26 @@ func ValidateInputs(vgs *model.GameState, card *model.Card) error {
 				return fmt.Errorf("input %d must be dice (1..6), got %v", i, val)
 			}
 
-		case 'p', 'U', 'A':
+		case 'p':
 			if val < 0 || val >= len(vgs.Players) {
 				return fmt.Errorf("input %d must be player index, got %v", i, val)
+			}
+
+		case 'U':
+			if val < 0 || val >= len(vgs.Players) {
+				return fmt.Errorf("input %d must be player index, got %v", i, val)
+			}
+			if val != card.Owner {
+				return fmt.Errorf("input %d must be your own index (%v), got %v", i, card.Owner, val)
+			}
+
+		case 'A':
+			if val < 0 || val >= len(vgs.Players) {
+				return fmt.Errorf("input %d must be player index, got %v", i, val)
+			}
+
+			if val != (vgs.Turn % len(vgs.Players)) {
+				return fmt.Errorf("input %d must be index of defending player, got %v", i, val)
 			}
 
 		case 'n':
