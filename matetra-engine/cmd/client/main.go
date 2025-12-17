@@ -20,11 +20,23 @@ import (
 var CurrentGameState model.GameState
 var PlayerID int = -1
 var PlayerName string
+var Banner string
+
+func loadBanner() {
+	content, err := os.ReadFile("ascii.txt")
+	if err == nil {
+		Banner = string(content)
+	} else {
+		// Fallback if file not found, or just empty
+		Banner = "MATETRA"
+	}
+}
 
 func main() {
 	log.SetFlags(0)
 
 	cmd := os.Args
+	loadBanner()
 
 	if len(cmd) < 2 {
 		fmt.Println("usage: go run matetra <server-address>")
@@ -207,8 +219,9 @@ func displayGameState(gs model.GameState) {
 	// Determine current player index safely
 	currentPlayerIndex := gs.Turn % len(gs.Players)
 
-	fmt.Println("=====================================================================")
-	fmt.Printf(" 🎮 GAME: %s | TURN: %d | CURRENT PLAYER: @%s\n", gs.GameID, gs.Turn, gs.Players[currentPlayerIndex].Name)
+	fmt.Println(Banner)
+	fmt.Println("\n=====================================================================")
+	fmt.Printf(" GAME: %s | TURN: %d | CURRENT PLAYER: @%s (ID: %d)\n", gs.GameID, gs.Turn, gs.Players[currentPlayerIndex].Name, currentPlayerIndex)
 	fmt.Println("=====================================================================")
 
 	// 1. Display Player Numbers
@@ -235,7 +248,7 @@ func displayGameState(gs model.GameState) {
 			}
 		}
 
-		fmt.Printf("%s %s @%s: %s\n", marker, doneStatus, p.Name, strings.Join(numberStrings, " | "))
+		fmt.Printf("%s %s @%s (ID: %d): %s\n", marker, doneStatus, p.Name, i, strings.Join(numberStrings, " | "))
 	}
 
 	// 2. Display Player Hand
@@ -277,12 +290,12 @@ func displayGameState(gs model.GameState) {
 
 	fmt.Println("---------------------------------------------------------------------")
 	fmt.Println("\n💡 COMMANDS:")
-	fmt.Println("  apply(cardIndex, input1, input2, ..., permanent)")
-	fmt.Println("    Example: apply(2, 0, 0, 5, 1)  - Play card C:2 with inputs [0,0,5], permanent")
-	fmt.Println("  turnend()  - End your turn")
-	fmt.Println("  state      - Redraw the game board")
-	fmt.Println("  help       - Show detailed help")
-	fmt.Println("  exit/quit  - Close the client")
+	fmt.Println("  apply(cardIndex, [inputs...], permanent)  - Play a card (permanent=1, preview=0)")
+	fmt.Println("  roll / dice                               - Roll the dice")
+	fmt.Println("  turnend                                   - End your turn")
+	fmt.Println("  state                                     - Refresh board")
+	fmt.Println("  help                                      - Show help")
+	fmt.Println("  exit                                      - Quit")
 }
 
 // ----------------------------------------------------------------------
@@ -323,12 +336,14 @@ func listenForUpdates(c *websocket.Conn) {
 				prefix = "[ERROR]"
 			}
 			fmt.Printf("\n%s %s\n", prefix, reply.Message)
+			fmt.Print(">>> ")
 
 		case "ERROR":
 			errorPayloadBytes, _ := json.Marshal(msg.Payload)
 			var errorData map[string]string
 			json.Unmarshal(errorPayloadBytes, &errorData)
 			fmt.Printf("\n[SERVER ERROR]: %s\n", errorData["message"])
+			fmt.Print(">>> ")
 		case "STATE_UPDATE":
 			// FIX: Handle global state updates (e.g. when other players join or turn changes)
 			statePayloadBytes, err := json.Marshal(msg.Payload)
@@ -343,6 +358,7 @@ func listenForUpdates(c *websocket.Conn) {
 			}
 			CurrentGameState = newMessageState
 			displayGameState(CurrentGameState)
+			fmt.Print("\n>>> ")
 
 		default:
 			// Ignore unhandled types like "PLAYER_ADDED"
@@ -358,7 +374,7 @@ func commandLoop(c *websocket.Conn) {
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		// Ensure the command prompt appears clearly after the state
-		fmt.Printf("\n> ")
+		fmt.Printf("\n>>> ")
 		input, _ := reader.ReadString('\n')
 		input = strings.TrimSpace(input)
 
@@ -420,6 +436,9 @@ func commandLoop(c *websocket.Conn) {
 		case "turnend":
 			sendTurnEnd(c)
 
+		case "roll", "dice":
+			sendDiceRoll(c)
+
 		case "exit", "quit":
 			fmt.Println("Exiting client.")
 			return
@@ -432,13 +451,11 @@ func commandLoop(c *websocket.Conn) {
 			}
 		case "help":
 			fmt.Println("\nAvailable Commands:")
-			fmt.Println("  apply(C, I1, I2, ..., P): Play a card.")
-			fmt.Println("    C: Card index (from YOUR HAND).")
-			fmt.Println("    I: Inputs (player/number index, dice roll, etc.).")
-			fmt.Println("    P: Permanent flag (1 to queue the move, 0 for preview).")
-			fmt.Println("  turnend(): Finish your turn.")
-			fmt.Println("  state: Redraw the game board.")
-			fmt.Println("  exit/quit: Close the client.")
+			fmt.Println("  apply(C, I1..., P) : Play card")
+			fmt.Println("  dice               : Roll dice")
+			fmt.Println("  turnend            : End turn")
+			fmt.Println("  state              : Refresh")
+			fmt.Println("  exit               : Quit")
 
 		default:
 			fmt.Printf("Unknown command: %s. Type 'help' for available commands.\n", command)
@@ -491,4 +508,20 @@ func sendTurnEnd(c *websocket.Conn) {
 		log.Printf("Error sending PROCESS_NEXT_TURN: %v", err)
 	}
 	fmt.Println("Sent turn end request. Waiting for update...")
+}
+
+func sendDiceRoll(c *websocket.Conn) {
+	if PlayerID == -1 {
+		fmt.Println("[ERROR] Player ID not established.")
+		return
+	}
+
+	msg := api.Message{
+		Type:    "ROLL_DICE",
+		Payload: nil,
+	}
+
+	if err := c.WriteJSON(msg); err != nil {
+		log.Printf("Error sending ROLL_DICE: %v", err)
+	}
 }
