@@ -52,6 +52,10 @@ func CardFunction(vgs *model.GameState, cardIndex int) error {
 
 	card = &vgs.Cards[cardIndex]
 
+	if err := utils.ValidateInputs(vgs, card); err != nil {
+		return err
+	}
+
 	switch card.Method {
 	case "ADD":
 		return functions.ADD(vgs, card)

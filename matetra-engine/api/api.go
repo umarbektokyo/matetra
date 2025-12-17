@@ -133,6 +133,8 @@ func (a *API) handleIncomingMessages(pc *PlayerConnection, msg Message) {
 		a.handlePlayCard(pc, msg.Payload)
 	case "PROCESS_NEXT_TURN":
 		a.handleNextTurn(pc)
+	case "ROLL_DICE":
+		a.handleRollDice(pc)
 	default:
 		a.sendError(pc, "unknown message type: "+msg.Type)
 	}
@@ -275,5 +277,23 @@ func (a *API) handleNextTurn(pc *PlayerConnection) {
 	if resultState.Turn != a.Game.State.Turn {
 		message = fmt.Sprintf("turn finished! started turn %d. current player is @%s", resultState.Turn, resultState.Players[resultState.Turn%len(resultState.Players)].Name)
 	}
+	a.BroadcastReply(true, message, resultState)
+}
+
+func (a *API) handleRollDice(pc *PlayerConnection) {
+	if pc.PlayerID == -1 {
+		a.sendError(pc, "not authenticated")
+		return
+	}
+
+	resultState, err := a.Game.ProcessDiceRoll(pc.PlayerID)
+	if err != nil {
+		a.sendCustomReply(pc, false, fmt.Sprintf("Dice roll failed: %v", err), nil)
+		return
+	}
+
+	playerName := resultState.Players[pc.PlayerID].Name
+	message := fmt.Sprintf("@%s rolled the dice!", playerName)
+
 	a.BroadcastReply(true, message, resultState)
 }

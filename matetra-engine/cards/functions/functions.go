@@ -3,16 +3,11 @@ package functions
 import (
 	"fmt"
 	"matetra/model"
-	"matetra/utils"
 	"math/big"
 )
 
 // Input: AnUn
 func ADD(vgs *model.GameState, card *model.Card) error {
-	if err := utils.ValidateInputs(vgs, card); err != nil {
-		return err
-	}
-
 	attackerPlayer := card.Inputs[0]
 	attackerIndex := card.Inputs[1]
 	userPlayer := card.Inputs[2]
@@ -31,10 +26,6 @@ func ADD(vgs *model.GameState, card *model.Card) error {
 
 // Input: AnUn
 func SUBTRACT(vgs *model.GameState, card *model.Card) error {
-	if err := utils.ValidateInputs(vgs, card); err != nil {
-		return err
-	}
-
 	attackerPlayer := card.Inputs[0]
 	attackerIndex := card.Inputs[1]
 	userPlayer := card.Inputs[2]
@@ -53,10 +44,6 @@ func SUBTRACT(vgs *model.GameState, card *model.Card) error {
 
 // Input: AnUn
 func MULTIPLY(vgs *model.GameState, card *model.Card) error {
-	if err := utils.ValidateInputs(vgs, card); err != nil {
-		return err
-	}
-
 	attackerPlayer := card.Inputs[0]
 	attackerIndex := card.Inputs[1]
 	userPlayer := card.Inputs[2]
@@ -75,10 +62,6 @@ func MULTIPLY(vgs *model.GameState, card *model.Card) error {
 
 // Input: AnUn
 func DIVIDE(vgs *model.GameState, card *model.Card) error {
-	if err := utils.ValidateInputs(vgs, card); err != nil {
-		return err
-	}
-
 	attackerPlayer := card.Inputs[0]
 	attackerIndex := card.Inputs[1]
 	userPlayer := card.Inputs[2]

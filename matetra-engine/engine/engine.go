@@ -3,6 +3,7 @@ package engine
 import (
 	"fmt"
 	"matetra/cards"
+	"matetra/cards/constants"
 	"matetra/model"
 	"matetra/utils"
 	"math/big"
@@ -223,8 +224,6 @@ func (g *Game) ApplyCards(vgs *model.GameState) error {
 func (g *Game) nextTurn() error {
 	virtual := g.copyState()
 
-	// FIX: Moves are now applied immediately during the turn.
-	// We just need to clear the queue (which served as history/display for the turn).
 	virtual.Queue = nil
 
 	g.State = virtual
@@ -243,7 +242,7 @@ func (g *Game) NextTurn() error {
 	return g.nextTurn()
 }
 
-// Checks if the player is moving their own card
+// checks if the player is moving their own card
 func (g *Game) PlayerCanPlayCard(playerID, cardIndex int) bool {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
@@ -261,7 +260,7 @@ func (g *Game) ProcessMove(playerID int, cardIndex int, inputs []int, permanent 
 
 	// check ownership
 	if !g.PlayerCanPlayCard(playerID, cardIndex) {
-		g.mu.RUnlock() // manual unlock before return, since RLock is at top
+		g.mu.RUnlock()
 		return nil, fmt.Errorf("you do not own this card")
 	}
 
@@ -275,7 +274,6 @@ func (g *Game) ProcessMove(playerID int, cardIndex int, inputs []int, permanent 
 	g.mu.RUnlock()
 
 	if !permanent {
-		// Use public CopyState (RLock) is fine here because we released RLock above
 		virtual := g.CopyState()
 
 		vCard := &virtual.Cards[cardIndex]
@@ -296,12 +294,10 @@ func (g *Game) ProcessMove(playerID int, cardIndex int, inputs []int, permanent 
 
 		g.State.Cards[cardIndex].Inputs = append([]int(nil), inputs...)
 
-		// FIX: Apply the move immediately to the global state
 		if err := g.ApplyCard(g.State, cardIndex); err != nil {
 			return nil, fmt.Errorf("move failed: %v", err)
 		}
 
-		// Keep adding to queue for UI display of "moves made this turn"
 		g.State.Queue = append(g.State.Queue, cardIndex)
 
 		return g.State, nil
@@ -328,10 +324,28 @@ func (g *Game) ProcessNextTurn(playerID int) (*model.GameState, error) {
 	}
 
 	if finished {
-		if err := g.nextTurn(); err != nil { // Use internal non-locking version
+		if err := g.nextTurn(); err != nil {
 			return nil, err
 		}
 	}
 
 	return g.State, nil
+}
+
+func (g *Game) ProcessDiceRoll(playerID int) (*model.GameState, error) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
+	// check if it is the player's turn
+	if playerID != (g.State.Turn % len(g.State.Players)) {
+		return nil, fmt.Errorf("it is not your turn")
+	}
+
+	// execute dice logic
+	err := constants.DICE(g.State, playerID)
+	if err != nil {
+		return nil, err
+	}
+
+	return g.copyState(), nil
 }
