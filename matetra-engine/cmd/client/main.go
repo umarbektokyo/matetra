@@ -409,16 +409,17 @@ func commandLoop(c *websocket.Conn) {
 
 			// Extract inputs and 'permanent' flag
 			var inputs []int
+			hasError := false
 			for i := 2; i < len(parts)-1; i++ {
 				inputVal, err := strconv.Atoi(parts[i])
 				if err != nil {
 					fmt.Printf("Invalid input value '%s' at position %d.\n", parts[i], i-1)
-					inputs = nil
+					hasError = true
 					break
 				}
 				inputs = append(inputs, inputVal)
 			}
-			if inputs == nil && len(parts) > 2 {
+			if hasError {
 				continue // Error already reported
 			}
 

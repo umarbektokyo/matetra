@@ -382,16 +382,35 @@ func (g *Game) ProcessDiceRoll(playerID int) (*model.GameState, error) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	// check if it is the player's turn
-	if playerID != (g.State.Turn % len(g.State.Players)) {
+	// 1. check if it is the player's turn
+	if len(g.State.Players) == 0 || playerID != (g.State.Turn%len(g.State.Players)) {
 		return nil, fmt.Errorf("it is not your turn")
 	}
 
-	// execute dice logic
-	err := constants.DICE(g.State, playerID)
+	// 2. Dice can only be rolled if the queue is empty
+	if len(g.State.Queue) > 0 {
+		return nil, fmt.Errorf("cannot roll dice after playing cards")
+	}
+
+	// 3. Find the first empty slot in the ACTUAL state
+	firstEmptySlot := -1
+	for i, num := range g.State.Numbers[playerID] {
+		if num.Mark == "n" {
+			firstEmptySlot = i
+			break
+		}
+	}
+
+	if firstEmptySlot == -1 {
+		return nil, fmt.Errorf("no empty slots available for dice roll")
+	}
+
+	// 4. Apply dice directly to the ACTUAL state (permanent)
+	err := constants.DICEAtSlot(g.State, playerID, firstEmptySlot)
 	if err != nil {
 		return nil, err
 	}
 
+	// Return a copy of the updated state
 	return g.copyState(), nil
 }

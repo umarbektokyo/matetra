@@ -25,4 +25,4 @@ Approximately overall: ~12%
 - Flush! - Esia
 - Noga L.
 - Pikachu - Meharwan
-- Umarbek 👾
+- Umarbek

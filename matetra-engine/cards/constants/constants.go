@@ -40,6 +40,21 @@ func DICE(vgs *model.GameState, player int) error {
 	return AddConstant(vgs, player, big.NewFloat(float64(utils.RollDice(6))), "")
 }
 
+func DICEAtSlot(vgs *model.GameState, player int, slotIndex int) error {
+	if slotIndex < 0 || slotIndex >= len(vgs.Numbers[player]) {
+		return fmt.Errorf("invalid slot index: %d", slotIndex)
+	}
+
+	diceValue := big.NewFloat(float64(utils.RollDice(6)))
+	fmt.Printf("[DEBUG] DICEAtSlot: Rolling dice for player %d at slot %d, value: %s\n",
+		player, slotIndex, diceValue.Text('g', 10))
+
+	vgs.Numbers[player][slotIndex].Value = diceValue
+	vgs.Numbers[player][slotIndex].Mark = ""
+
+	return nil
+}
+
 func CONSTPI(vgs *model.GameState, card *model.Card) error {
 	return AddConstant(vgs, card.Owner, big.NewFloat(math.Pi), "")
 }
