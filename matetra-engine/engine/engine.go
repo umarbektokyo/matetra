@@ -229,8 +229,34 @@ func (g *Game) nextTurn() error {
 	g.State = virtual
 	g.restockCards()
 
-	// Increment Fibonacci number
-	// Un-immune the cards
+	// cleanup card marks
+	for i := range g.State.Numbers {
+		for j := range g.State.Numbers[i] {
+			// Un-immune
+			if g.State.Numbers[i][j].Mark == "I" {
+				g.State.Numbers[i][j].Mark = ""
+			}
+
+			// Fibonacci
+			if g.State.Numbers[i][j].Mark == "F" && g.State.Numbers[i][j].Value != nil {
+				val, _ := g.State.Numbers[i][j].Value.Float64()
+				v := int64(val)
+
+				a, b := int64(1), int64(2)
+				if v == 1 {
+					g.State.Numbers[i][j].Value = big.NewFloat(2)
+				} else {
+					for b <= v {
+						if b == v {
+							g.State.Numbers[i][j].Value = big.NewFloat(float64(a + b))
+							break
+						}
+						a, b = b, a+b
+					}
+				}
+			}
+		}
+	}
 
 	g.State.Turn++
 	for i := range g.State.Done {
@@ -271,18 +297,26 @@ func (g *Game) ProcessMove(playerID int, cardIndex int, inputs []int, permanent 
 
 	g.mu.RUnlock()
 
+	// Virtual state for preview/calculation
+	virtual := g.CopyState()
+
+	// Apply the specific move to the virtual state (queue it)
+	vCard := &virtual.Cards[cardIndex]
+	vCard.Inputs = append([]int(nil), inputs...)
+	virtual.Queue = append(virtual.Queue, cardIndex)
+
+	// Execute ALL queued cards on the virtual state to get the final result
+	fmt.Printf("[DEBUG] ProcessMove: Applying queue on virtual state. Queue len: %d\n", len(virtual.Queue))
+	if err := g.ApplyCards(virtual); err != nil {
+		return nil, fmt.Errorf("calculation failed: %v", err)
+	}
+	fmt.Printf("[DEBUG] ProcessMove: Applied. Virtual Numbers[0]: %v\n", virtual.Numbers[0])
+
 	if !permanent {
-		virtual := g.CopyState()
-
-		vCard := &virtual.Cards[cardIndex]
-		vCard.Inputs = append([]int(nil), inputs...)
-
-		if err := g.ApplyCard(virtual, cardIndex); err != nil {
-			return nil, fmt.Errorf("preview failed: %v", err)
-		}
-
+		// Non-permanent: just return the virtual calculated state
 		return virtual, nil
 	} else {
+		// Permanent: Update valid state AND return virtual calculated state
 		g.mu.Lock()
 		defer g.mu.Unlock()
 
@@ -290,15 +324,20 @@ func (g *Game) ProcessMove(playerID int, cardIndex int, inputs []int, permanent 
 			return nil, fmt.Errorf("you have already finished your turn")
 		}
 
+		// Validation on live state
+		originalInputs := g.State.Cards[cardIndex].Inputs
 		g.State.Cards[cardIndex].Inputs = append([]int(nil), inputs...)
 
-		if err := g.ApplyCard(g.State, cardIndex); err != nil {
-			return nil, fmt.Errorf("move failed: %v", err)
+		if err := utils.ValidateInputs(g.State, &g.State.Cards[cardIndex]); err != nil {
+			g.State.Cards[cardIndex].Inputs = originalInputs
+			return nil, fmt.Errorf("invalid inputs: %v", err)
 		}
 
+		// Queue in real state
 		g.State.Queue = append(g.State.Queue, cardIndex)
 
-		return g.State, nil
+		// Return the VIRTUAL state (which has the queue applied) for display
+		return virtual, nil
 	}
 }
 
@@ -322,14 +361,23 @@ func (g *Game) ProcessNextTurn(playerID int) (*model.GameState, error) {
 	}
 
 	if finished {
+		// execute all queued cards
+		if err := g.ApplyCards(g.State); err != nil {
+			// If application fails at this stage, it's problematic because turn is "done".
+			// But for now, returning error is all we can do.
+			// Ideally we should have validated everything perfectly before.
+			return nil, fmt.Errorf("failed to apply queued cards: %v", err)
+		}
+
 		if err := g.nextTurn(); err != nil {
 			return nil, err
 		}
 	}
 
-	return g.State, nil
+	return g.copyState(), nil
 }
 
+// API: Dice
 func (g *Game) ProcessDiceRoll(playerID int) (*model.GameState, error) {
 	g.mu.Lock()
 	defer g.mu.Unlock()

@@ -125,6 +125,8 @@ func PASCALTRIANGLE(vgs *model.GameState, card *model.Card) error {
 		nums[i].Mark = "n"
 	}
 
+	vgs.Numbers[player] = nums
+
 	return nil
 }
 

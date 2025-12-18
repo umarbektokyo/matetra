@@ -1,6 +1,7 @@
 package constants
 
 import (
+	"fmt"
 	"matetra/model"
 	"matetra/utils"
 	"math"
@@ -8,27 +9,29 @@ import (
 )
 
 func AddConstant(vgs *model.GameState, player int, value *big.Float, mark string) error {
-	numbers := vgs.Numbers[player]
-
-	for i, num := range numbers {
+	fmt.Printf("[DEBUG] AddConstant: Adding %s to player %d\n", value.Text('g', 10), player)
+	for i := range vgs.Numbers[player] {
 		// prefer an empty slot
-		if num.Mark == "n" {
-			numbers[i].Value = value
-			numbers[i].Mark = mark
+		if vgs.Numbers[player][i].Mark == "n" {
+			fmt.Printf("[DEBUG] AddConstant: Found empty slot at %d\n", i)
+			a := &vgs.Numbers[player][i]
+			a.Value = value
+			a.Mark = mark
 			return nil
 		}
 	}
 
 	// resort to replacing smallest value
 	minIdx := 0
-	for i := 1; i < len(numbers); i++ {
-		if numbers[i].Value.Cmp(numbers[minIdx].Value) < 0 {
+	for i := 1; i < len(vgs.Numbers[player]); i++ {
+		if vgs.Numbers[player][i].Value.Cmp(vgs.Numbers[player][minIdx].Value) < 0 {
 			minIdx = i
 		}
 	}
 
-	numbers[minIdx].Value = value
-	numbers[minIdx].Mark = mark
+	a := &vgs.Numbers[player][minIdx]
+	a.Value = value
+	a.Mark = mark
 
 	return nil
 }
@@ -85,7 +88,7 @@ func CONSTGOOGLE(vgs *model.GameState, card *model.Card) error {
 			if q.IsInt() {
 				// steal
 				_ = AddConstant(vgs, card.Owner, new(big.Float).Set(num.Value), "")
-				num.Value = nil
+				num.Value = big.NewFloat(0)
 				num.Mark = "n"
 				return nil
 			}
@@ -109,7 +112,15 @@ func CONSTZERO(vgs *model.GameState, card *model.Card) error {
 }
 
 func CONST7(vgs *model.GameState, card *model.Card) error {
-	return AddConstant(vgs, card.Owner, big.NewFloat(7), "")
+	if err := AddConstant(vgs, card.Owner, big.NewFloat(7), ""); err != nil {
+		return err
+	}
+
+	r1, r2 := utils.RollDice(6), utils.RollDice(6)
+	if r1+r2 == 7 {
+		return AddConstant(vgs, card.Owner, big.NewFloat(7), "")
+	}
+	return nil
 }
 
 func CONST26(vgs *model.GameState, card *model.Card) error {

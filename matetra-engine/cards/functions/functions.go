@@ -440,6 +440,9 @@ func SIGMANOTATION(vgs *model.GameState, card *model.Card) error {
 
 	numbers[dest].Value = sum
 
+	// Write back
+	vgs.Numbers[player] = numbers
+
 	return nil
 }
 
@@ -474,6 +477,9 @@ func PRODUCTNOTATION(vgs *model.GameState, card *model.Card) error {
 	}
 
 	numbers[dest].Value = product
+
+	// Write back
+	vgs.Numbers[player] = numbers
 
 	return nil
 }

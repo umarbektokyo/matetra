@@ -12,7 +12,16 @@ $$ | $$ | $$ |\$$$$$$$ | \$$$$  |\$$$$$$$\  \$$$$  |$$ |     \$$$$$$$ |
 
 ```
 
-Matetra Team:
+## Progress
+ - [x] Game Server: Functining and running
+ - [x] CLI-Client: Functining and running
+ - [ ] TUI-Client: In development
+ - [ ] Godot-Client: In development
+ - [ ] Physical Game: Design Stage
+
+Approximately overall: ~12%
+
+## Welcome the crew!
 - Flush! - Esia
 - Noga L.
 - Pikachu - Meharwan
