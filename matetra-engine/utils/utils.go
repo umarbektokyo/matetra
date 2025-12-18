@@ -5,11 +5,18 @@ import (
 	"encoding/hex"
 	"fmt"
 	"matetra/model"
+	"math/rand"
+	"time"
 )
 
 var VERSION = "0.1"
 var PORT int = 1729
 var DECK_PATH string = "cards/cards.csv"
+var r *rand.Rand
+
+func init() {
+	r = rand.New(rand.NewSource(time.Now().UnixNano()))
+}
 
 func Must[T any](v T, err error) T {
 	if err != nil {
@@ -86,4 +93,9 @@ func ValidateInputs(vgs *model.GameState, card *model.Card) error {
 	}
 
 	return nil
+}
+
+func RollDice(sides int) int {
+	roll := r.Intn(sides) + 1
+	return roll
 }
