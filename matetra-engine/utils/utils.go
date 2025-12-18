@@ -4,8 +4,11 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"log"
 	"matetra/model"
+	"math/big"
 	"math/rand"
+	"os"
 	"time"
 )
 
@@ -31,7 +34,12 @@ func Hash(s string) string {
 }
 
 func MatetraSplash() {
-	fmt.Println("Matetra v" + VERSION)
+	content, err := os.ReadFile("ascii.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(string(content))
 }
 
 func ValidateInputs(vgs *model.GameState, card *model.Card) error {
@@ -92,10 +100,91 @@ func ValidateInputs(vgs *model.GameState, card *model.Card) error {
 
 	}
 
+	// Check for immunity
+	for i := 0; i < len(card.InputsReq); i++ {
+		if card.InputsReq[i] == 'n' {
+			player := card.Inputs[i-1]
+			index := card.Inputs[i]
+			if vgs.Numbers[player][index].Mark == "I" {
+				return fmt.Errorf("number %d of player %d is immune this turn", index, player)
+			}
+		}
+	}
+
 	return nil
 }
 
 func RollDice(sides int) int {
 	roll := r.Intn(sides) + 1
 	return roll
+}
+
+func CheckCardMark(vgs *model.GameState, playerIndex int, numberIndex int) error {
+	if vgs.Numbers[playerIndex][numberIndex].Mark == "n" {
+		return fmt.Errorf("cannot use null card")
+	}
+	return nil
+}
+
+func FindIsland(vgs *model.GameState, player int, index int) (int, int, error) {
+	if index < 0 || index >= len(vgs.Numbers[player]) {
+		return 0, 0, fmt.Errorf("index out of range")
+	}
+
+	if vgs.Numbers[player][index].Mark == "n" {
+		return 0, 0, fmt.Errorf("selected number is null")
+	}
+
+	nums := vgs.Numbers[player]
+
+	// expand left
+	L := index
+	for L > 0 && nums[L-1].Mark != "n" {
+		L--
+	}
+
+	// expand right
+	R := index
+	for R < len(nums)-1 && nums[R+1].Mark != "n" {
+		R++
+	}
+
+	return L, R, nil
+}
+
+func PrimeFactors(n *big.Int) []*big.Int {
+	factors := []*big.Int{}
+	x := new(big.Int).Set(n)
+
+	two := big.NewInt(2)
+	zero := big.NewInt(0)
+
+	for new(big.Int).Mod(x, two).Cmp(zero) == 0 {
+		factors = append(factors, big.NewInt(2))
+		x.Div(x, two)
+	}
+
+	d := big.NewInt(3)
+	for d.Mul(d, d).Cmp(x) <= 0 {
+		for new(big.Int).Mod(x, d).Cmp(zero) == 0 {
+			factors = append(factors, new(big.Int).Set(d))
+			x.Div(x, d)
+		}
+		d.Add(d, two)
+	}
+
+	if x.Cmp(big.NewInt(1)) > 0 {
+		factors = append(factors, x)
+	}
+
+	return factors
+}
+
+func FloatToIntExact(f *big.Float) (*big.Int, bool) {
+	i := new(big.Int)
+	if f.IsInt() {
+		f.Int(i)
+		return i, true
+	}
+	return nil, false
 }

@@ -228,18 +228,16 @@ func (g *Game) nextTurn() error {
 
 	g.State = virtual
 	g.restockCards()
+
+	// Increment Fibonacci number
+	// Un-immune the cards
+
 	g.State.Turn++
 	for i := range g.State.Done {
 		g.State.Done[i] = false
 	}
-	return nil
-}
 
-// Ends a player's turn
-func (g *Game) NextTurn() error {
-	g.mu.Lock()
-	defer g.mu.Unlock()
-	return g.nextTurn()
+	return nil
 }
 
 // checks if the player is moving their own card

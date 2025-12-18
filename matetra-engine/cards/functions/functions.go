@@ -8,13 +8,6 @@ import (
 	"math/big"
 )
 
-func checkCardMark(vgs *model.GameState, playerIndex int, numberIndex int) error {
-	if vgs.Numbers[playerIndex][numberIndex].Mark == "n" {
-		return fmt.Errorf("cannot use null card")
-	}
-	return nil
-}
-
 // Input: AnUn
 func ADD(vgs *model.GameState, card *model.Card) error {
 	attackerPlayer := card.Inputs[0]
@@ -22,8 +15,8 @@ func ADD(vgs *model.GameState, card *model.Card) error {
 	userPlayer := card.Inputs[2]
 	userIndex := card.Inputs[3]
 
-	checkCardMark(vgs, attackerPlayer, attackerIndex)
-	checkCardMark(vgs, userPlayer, userIndex)
+	utils.CheckCardMark(vgs, attackerPlayer, attackerIndex)
+	utils.CheckCardMark(vgs, userPlayer, userIndex)
 
 	a := &vgs.Numbers[attackerPlayer][attackerIndex]
 	b := &vgs.Numbers[userPlayer][userIndex]
@@ -43,8 +36,8 @@ func SUBTRACT(vgs *model.GameState, card *model.Card) error {
 	userPlayer := card.Inputs[2]
 	userIndex := card.Inputs[3]
 
-	checkCardMark(vgs, attackerPlayer, attackerIndex)
-	checkCardMark(vgs, userPlayer, userIndex)
+	utils.CheckCardMark(vgs, attackerPlayer, attackerIndex)
+	utils.CheckCardMark(vgs, userPlayer, userIndex)
 
 	a := &vgs.Numbers[attackerPlayer][attackerIndex]
 	b := &vgs.Numbers[userPlayer][userIndex]
@@ -64,8 +57,8 @@ func MULTIPLY(vgs *model.GameState, card *model.Card) error {
 	userPlayer := card.Inputs[2]
 	userIndex := card.Inputs[3]
 
-	checkCardMark(vgs, attackerPlayer, attackerIndex)
-	checkCardMark(vgs, userPlayer, userIndex)
+	utils.CheckCardMark(vgs, attackerPlayer, attackerIndex)
+	utils.CheckCardMark(vgs, userPlayer, userIndex)
 
 	a := &vgs.Numbers[attackerPlayer][attackerIndex]
 	b := &vgs.Numbers[userPlayer][userIndex]
@@ -85,8 +78,8 @@ func DIVIDE(vgs *model.GameState, card *model.Card) error {
 	userPlayer := card.Inputs[2]
 	userIndex := card.Inputs[3]
 
-	checkCardMark(vgs, attackerPlayer, attackerIndex)
-	checkCardMark(vgs, userPlayer, userIndex)
+	utils.CheckCardMark(vgs, attackerPlayer, attackerIndex)
+	utils.CheckCardMark(vgs, userPlayer, userIndex)
 
 	a := &vgs.Numbers[attackerPlayer][attackerIndex]
 	b := &vgs.Numbers[userPlayer][userIndex]
@@ -108,7 +101,7 @@ func ABSOLUTEVALUE(vgs *model.GameState, card *model.Card) error {
 	attackerPlayer := card.Inputs[0]
 	attackerIndex := card.Inputs[1]
 
-	checkCardMark(vgs, attackerPlayer, attackerIndex)
+	utils.CheckCardMark(vgs, attackerPlayer, attackerIndex)
 
 	a := &vgs.Numbers[attackerPlayer][attackerIndex]
 
@@ -122,7 +115,7 @@ func INVERSE(vgs *model.GameState, card *model.Card) error {
 	attackerPlayer := card.Inputs[0]
 	attackerIndex := card.Inputs[1]
 
-	checkCardMark(vgs, attackerPlayer, attackerIndex)
+	utils.CheckCardMark(vgs, attackerPlayer, attackerIndex)
 
 	a := &vgs.Numbers[attackerPlayer][attackerIndex]
 
@@ -140,7 +133,7 @@ func NEGATIVE(vgs *model.GameState, card *model.Card) error {
 	attackerPlayer := card.Inputs[0]
 	attackerIndex := card.Inputs[1]
 
-	checkCardMark(vgs, attackerPlayer, attackerIndex)
+	utils.CheckCardMark(vgs, attackerPlayer, attackerIndex)
 
 	a := &vgs.Numbers[attackerPlayer][attackerIndex]
 
@@ -159,7 +152,7 @@ func SQRT(vgs *model.GameState, card *model.Card) error {
 	attackerPlayer := card.Inputs[0]
 	attackerIndex := card.Inputs[1]
 
-	checkCardMark(vgs, attackerPlayer, attackerIndex)
+	utils.CheckCardMark(vgs, attackerPlayer, attackerIndex)
 
 	a := &vgs.Numbers[attackerPlayer][attackerIndex]
 
@@ -177,7 +170,7 @@ func SQUARE(vgs *model.GameState, card *model.Card) error {
 	attackerPlayer := card.Inputs[0]
 	attackerIndex := card.Inputs[1]
 
-	checkCardMark(vgs, attackerPlayer, attackerIndex)
+	utils.CheckCardMark(vgs, attackerPlayer, attackerIndex)
 
 	a := &vgs.Numbers[attackerPlayer][attackerIndex]
 
@@ -191,7 +184,7 @@ func COSMOD(vgs *model.GameState, card *model.Card) error {
 	attackerPlayer := card.Inputs[0]
 	attackerIndex := card.Inputs[1]
 
-	checkCardMark(vgs, attackerPlayer, attackerIndex)
+	utils.CheckCardMark(vgs, attackerPlayer, attackerIndex)
 
 	a := &vgs.Numbers[attackerPlayer][attackerIndex]
 
@@ -209,7 +202,7 @@ func SINMOD(vgs *model.GameState, card *model.Card) error {
 	attackerPlayer := card.Inputs[0]
 	attackerIndex := card.Inputs[1]
 
-	checkCardMark(vgs, attackerPlayer, attackerIndex)
+	utils.CheckCardMark(vgs, attackerPlayer, attackerIndex)
 
 	a := &vgs.Numbers[attackerPlayer][attackerIndex]
 
@@ -227,7 +220,7 @@ func TANMOD(vgs *model.GameState, card *model.Card) error {
 	attackerPlayer := card.Inputs[0]
 	attackerIndex := card.Inputs[1]
 
-	checkCardMark(vgs, attackerPlayer, attackerIndex)
+	utils.CheckCardMark(vgs, attackerPlayer, attackerIndex)
 
 	a := &vgs.Numbers[attackerPlayer][attackerIndex]
 
@@ -245,7 +238,7 @@ func LOG10(vgs *model.GameState, card *model.Card) error {
 	attackerPlayer := card.Inputs[0]
 	attackerIndex := card.Inputs[1]
 
-	checkCardMark(vgs, attackerPlayer, attackerIndex)
+	utils.CheckCardMark(vgs, attackerPlayer, attackerIndex)
 
 	a := &vgs.Numbers[attackerPlayer][attackerIndex]
 
@@ -265,7 +258,7 @@ func EXPONENTIAL(vgs *model.GameState, card *model.Card) error {
 	attackerPlayer := card.Inputs[0]
 	attackerIndex := card.Inputs[1]
 
-	checkCardMark(vgs, attackerPlayer, attackerIndex)
+	utils.CheckCardMark(vgs, attackerPlayer, attackerIndex)
 
 	a := &vgs.Numbers[attackerPlayer][attackerIndex]
 
@@ -281,7 +274,7 @@ func NATLOG(vgs *model.GameState, card *model.Card) error {
 	attackerPlayer := card.Inputs[0]
 	attackerIndex := card.Inputs[1]
 
-	checkCardMark(vgs, attackerPlayer, attackerIndex)
+	utils.CheckCardMark(vgs, attackerPlayer, attackerIndex)
 
 	a := &vgs.Numbers[attackerPlayer][attackerIndex]
 
@@ -301,7 +294,7 @@ func LOGORHYTHM(vgs *model.GameState, card *model.Card) error {
 	attackerPlayer := card.Inputs[0]
 	attackerIndex := card.Inputs[1]
 
-	checkCardMark(vgs, attackerPlayer, attackerIndex)
+	utils.CheckCardMark(vgs, attackerPlayer, attackerIndex)
 
 	a := &vgs.Numbers[attackerPlayer][attackerIndex]
 	dice := utils.RollDice(6)
@@ -322,7 +315,7 @@ func ROOTBASE(vgs *model.GameState, card *model.Card) error {
 	attackerPlayer := card.Inputs[0]
 	attackerIndex := card.Inputs[1]
 
-	checkCardMark(vgs, attackerPlayer, attackerIndex)
+	utils.CheckCardMark(vgs, attackerPlayer, attackerIndex)
 
 	a := &vgs.Numbers[attackerPlayer][attackerIndex]
 	dice := utils.RollDice(6)
@@ -343,7 +336,7 @@ func EXPONENTBASE(vgs *model.GameState, card *model.Card) error {
 	attackerPlayer := card.Inputs[0]
 	attackerIndex := card.Inputs[1]
 
-	checkCardMark(vgs, attackerPlayer, attackerIndex)
+	utils.CheckCardMark(vgs, attackerPlayer, attackerIndex)
 
 	a := &vgs.Numbers[attackerPlayer][attackerIndex]
 	dice := utils.RollDice(6)
@@ -362,8 +355,8 @@ func POLYNOMIAL1(vgs *model.GameState, card *model.Card) error {
 	userPlayer := card.Inputs[2]
 	userIndex := card.Inputs[3]
 
-	checkCardMark(vgs, attackerPlayer, attackerIndex)
-	checkCardMark(vgs, userPlayer, userIndex)
+	utils.CheckCardMark(vgs, attackerPlayer, attackerIndex)
+	utils.CheckCardMark(vgs, userPlayer, userIndex)
 
 	a := &vgs.Numbers[attackerPlayer][attackerIndex]
 	b := &vgs.Numbers[userPlayer][userIndex]
@@ -389,9 +382,9 @@ func POLYNOMIAL2(vgs *model.GameState, card *model.Card) error {
 	userPlayer2 := card.Inputs[4]
 	userIndex2 := card.Inputs[5]
 
-	checkCardMark(vgs, attackerPlayer, attackerIndex)
-	checkCardMark(vgs, userPlayer, userIndex)
-	checkCardMark(vgs, userPlayer2, userIndex2)
+	utils.CheckCardMark(vgs, attackerPlayer, attackerIndex)
+	utils.CheckCardMark(vgs, userPlayer, userIndex)
+	utils.CheckCardMark(vgs, userPlayer2, userIndex2)
 
 	a := &vgs.Numbers[attackerPlayer][attackerIndex]
 	b := &vgs.Numbers[userPlayer][userIndex]

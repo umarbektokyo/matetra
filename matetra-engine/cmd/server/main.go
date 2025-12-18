@@ -24,9 +24,8 @@ func main() {
 			fmt.Println("(ex: matetra start wonderful-game)")
 			return
 		}
-
+		utils.MatetraSplash()
 		game := engine.New(cmd[2])
-
 		log.Printf("loading card deck...")
 		game.LoadCards()
 		log.Printf("deck loaded with %d cards", len(game.State.Cards))

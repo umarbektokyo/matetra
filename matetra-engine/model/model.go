@@ -34,6 +34,7 @@ type Number struct {
 	Mark  string
 	// n: null
 	// F: fibonacci
+	// I: immune
 }
 
 // Main Game Object

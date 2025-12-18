@@ -1,7 +1,6 @@
 package constants
 
 import (
-	"fmt"
 	"matetra/model"
 	"matetra/utils"
 	"math"
@@ -9,20 +8,28 @@ import (
 )
 
 func AddConstant(vgs *model.GameState, player int, value *big.Float, mark string) error {
-	foundSlot := -1
-	for i, num := range vgs.Numbers[player] {
+	numbers := vgs.Numbers[player]
+
+	for i, num := range numbers {
+		// prefer an empty slot
 		if num.Mark == "n" {
-			foundSlot = i
-			break
+			numbers[i].Value = value
+			numbers[i].Mark = mark
+			return nil
 		}
 	}
 
-	if foundSlot == -1 {
-		return fmt.Errorf("no empty slots available")
+	// resort to replacing smallest value
+	minIdx := 0
+	for i := 1; i < len(numbers); i++ {
+		if numbers[i].Value.Cmp(numbers[minIdx].Value) < 0 {
+			minIdx = i
+		}
 	}
 
-	vgs.Numbers[player][foundSlot].Value = value
-	vgs.Numbers[player][foundSlot].Mark = mark
+	numbers[minIdx].Value = value
+	numbers[minIdx].Mark = mark
+
 	return nil
 }
 
