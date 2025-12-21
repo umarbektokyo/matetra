@@ -1,0 +1,67 @@
+[gd_scene load_steps=4 format=3 uid="uid://c1ii0kq4pa0md"]
+
+[ext_resource type="FontFile" uid="uid://dq4f14pyqxh3y" path="res://Miracode.ttf" id="1_28flt"]
+[ext_resource type="Script" uid="uid://b8bco5drhib1x" path="res://Scenes/join_server.gd" id="2_48xlc"]
+[ext_resource type="Script" uid="uid://bm2yf4h3v2o60" path="res://Scenes/create_server.gd" id="3_1ehe0"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -200.0
+offset_right = 300.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(300, 300)
+layout_mode = 2
+
+[node name="Button4" type="Button" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(30, 90)
+layout_mode = 2
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("1_28flt")
+theme_override_font_sizes/font_size = 26
+text = "JOIN SERVER"
+script = ExtResource("2_48xlc")
+
+[node name="Button5" type="Button" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(30, 90)
+layout_mode = 2
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("1_28flt")
+theme_override_font_sizes/font_size = 26
+text = "CREATE SERVER"
+script = ExtResource("3_1ehe0")
+
+[node name="Button2" type="Button" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(30, 90)
+layout_mode = 2
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("1_28flt")
+theme_override_font_sizes/font_size = 42
+text = "OPTIONS"
+
+[node name="Button3" type="Button" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(30, 90)
+layout_mode = 2
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = ExtResource("1_28flt")
+theme_override_font_sizes/font_size = 42
+text = "EXIT"
+
+[connection signal="pressed" from="CenterContainer/VBoxContainer/Button4" to="CenterContainer/VBoxContainer/Button4" method="_on_pressed"]

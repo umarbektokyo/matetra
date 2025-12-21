@@ -15,7 +15,6 @@ var _is_connected = false
 var current_game_state: GameData.GameState = GameData.GameState.new()
 
 func _ready():
-	connect_to_server()
 	pass
 
 func connect_to_server():
