@@ -12,6 +12,8 @@ $$ | $$ | $$ |\$$$$$$$ | \$$$$  |\$$$$$$$\  \$$$$  |$$ |     \$$$$$$$ |
 
 ```
 
+For the latest versions and documentation on the matetra-tui, please check [matetra-engine repository](https://github.com/umarbektokyo/matetra-engine)
+
 # Installation
 ```bash
 git clone https://github.com/umarbektokyo/matetra
@@ -35,7 +37,7 @@ matetra-server start "game-name"
 ## Progress
  - [x] Game Server: Functining and running
  - [x] CLI-Client: Functining and running
- - [ ] TUI-Client: In development
+ - [x] TUI-Client: In development
  - [ ] Godot-Client: In development
  - [ ] Physical Game: Design Stage
 
